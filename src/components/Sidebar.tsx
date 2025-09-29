@@ -1,0 +1,77 @@
+import React from 'react';
+import { Package, Users, History, BarChart3, Plus, Minus, Menu, X } from 'lucide-react';
+
+interface SidebarProps {
+  currentView: string;
+  onViewChange: (view: string) => void;
+  isMobileMenuOpen: boolean;
+  onToggleMobileMenu: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  currentView, 
+  onViewChange, 
+  isMobileMenuOpen, 
+  onToggleMobileMenu 
+}) => {
+  const menuItems = [
+    { id: 'dashboard', label: 'Kontrolna tabla', icon: BarChart3 },
+    { id: 'inventory', label: 'Inventar', icon: Package },
+    { id: 'input', label: 'Ulaz robe', icon: Plus },
+    { id: 'output', label: 'Izlaz robe', icon: Minus },
+    { id: 'staff', label: 'Osoblje', icon: Users },
+    { id: 'history', label: 'Istorija', icon: History },
+  ];
+
+  return (
+    <>
+      {/* Mobile menu button */}
+      <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Package className="h-6 w-6 text-blue-600" />
+          <span className="text-lg font-bold text-gray-800">InventarPro</span>
+        </div>
+        <button
+          onClick={onToggleMobileMenu}
+          className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
+        >
+          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </div>
+
+      {/* Sidebar */}
+      <div className={`
+        ${isMobileMenuOpen ? 'block' : 'hidden'} lg:block
+        w-full lg:w-64 bg-white shadow-lg lg:h-full
+        ${isMobileMenuOpen ? 'absolute inset-x-0 top-16 z-50 border-b' : ''}
+      `}>
+        <div className="hidden lg:block p-6 border-b">
+          <div className="flex items-center space-x-2">
+            <Package className="h-8 w-8 text-blue-600" />
+            <span className="text-xl font-bold text-gray-800">InventarPro</span>
+          </div>
+        </div>
+        
+        <nav className="mt-0 lg:mt-6">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onViewChange(item.id)}
+                className={`w-full flex items-center px-4 lg:px-6 py-3 text-left transition-colors ${
+                  currentView === item.id
+                    ? 'bg-blue-50 border-r-4 border-blue-600 text-blue-600'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'
+                }`}
+              >
+                <Icon className="h-5 w-5 mr-3" />
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+    </>
+  );
+};
