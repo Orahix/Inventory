@@ -26,18 +26,18 @@ export const InventoryList: React.FC<InventoryListProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProject, setSelectedProject] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   
-  // Get unique projects from transactions
-  const projects = Array.from(new Set(transactions.map(t => t.project))).filter(Boolean);
+  // Get unique categories from inventory
+  const categories = Array.from(new Set(inventory.map(item => item.category))).filter(Boolean).sort();
 
   const filteredInventory = inventory.filter(item =>
     (item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
      item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
      item.supplier.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (selectedProject === 'all' || item.project === selectedProject)
+    (selectedCategory === 'all' || item.category === selectedCategory)
   );
 
   const handleAddItem = () => {
@@ -112,13 +112,13 @@ export const InventoryList: React.FC<InventoryListProps> = ({
           <div className="flex items-center space-x-2">
             <Filter className="h-5 w-5 text-gray-400" />
             <select
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
             >
-              <option value="all">Svi projekti</option>
-              {projects.map(project => (
-                <option key={project} value={project}>{project}</option>
+              <option value="all">Sve kategorije</option>
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
               ))}
             </select>
           </div>
@@ -190,7 +190,7 @@ export const InventoryList: React.FC<InventoryListProps> = ({
 
         {filteredInventory.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            {searchTerm || selectedProject !== 'all' ? 'Nema stavki koje odgovaraju filterima.' : 'Nema pronađenih stavki inventara.'}
+            {searchTerm || selectedCategory !== 'all' ? 'Nema stavki koje odgovaraju filterima.' : 'Nema pronađenih stavki inventara.'}
           </div>
         )}
       </div>
