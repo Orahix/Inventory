@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, TrendingUp, TrendingDown, AlertTriangle, Filter } from 'lucide-react';
+import { Package, TrendingUp, TrendingDown, AlertTriangle, Filter, BarChart3 } from 'lucide-react';
 import { InventoryItem, Transaction } from '../types';
 
 interface DashboardProps {
@@ -87,7 +87,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ inventory, transactions })
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow-sm p-4 lg:p-6">
           <h3 className="text-base lg:text-lg font-semibold text-gray-800 mb-4">Upozorenja o niskim zalihama</h3>
           {lowStockItems.length === 0 ? (
@@ -109,6 +109,48 @@ export const Dashboard: React.FC<DashboardProps> = ({ inventory, transactions })
           )}
         </div>
 
+        <div className="bg-white rounded-lg shadow-sm p-4 lg:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base lg:text-lg font-semibold text-gray-800">Materijali po projektima</h3>
+            <BarChart3 className="h-5 w-5 text-blue-600" />
+          </div>
+          
+          <div className="mb-4">
+            <select
+              value={selectedProject}
+              onChange={(e) => setSelectedProject(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              <option value="all">Svi projekti</option>
+              {projects.map(project => (
+                <option key={project} value={project}>{project}</option>
+              ))}
+            </select>
+          </div>
+
+          {(() => {
+            const projectTransactions = selectedProject === 'all' 
+              ? transactions.filter(t => t.type === 'output')
+              : transactions.filter(t => t.type === 'output' && t.project === selectedProject);
+            
+            const projectMaterials = projectTransactions.reduce((acc, transaction) => {
+              const key = `${transaction.project}-${transaction.itemName}`;
+              if (!acc[key]) {
+                acc[key] = {
+                  project: transaction.project,
+                  itemName: transaction.itemName,
+                  totalQuantity: 0,
+                  totalValue: 0
+                };
+              }
+              acc[key].totalQuantity += transaction.quantity;
+              acc[key].totalValue += transaction.totalValue;
+              return acc;
+            }, {} as Record<string, { project: string; itemName: string; totalQuantity: number; totalValue: number }>);
+
+            const sortedMaterials = Object.values(projectMaterials)
+              .sort((a, b) => b.totalValue - a.totalValue)
+              .slice(0, 5);
         <div className="bg-white rounded-lg shadow-sm p-4 lg:p-6">
           <h3 className="text-base lg:text-lg font-semibold text-gray-800 mb-4">Nedavne transakcije</h3>
           {recentTransactions.length === 0 ? (
@@ -144,6 +186,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ inventory, transactions })
               ))}
             </div>
           )}
+        </div>
+            return sortedMaterials.length === 0 ? (
+              <p className="text-sm text-gray-500">Nema izvezenih materijala</p>
+            ) : (
+              <div className="space-y-3">
+                {sortedMaterials.map((material, index) => (
+                  <div key={`${material.project}-${material.itemName}`} className="flex items-center justify-between p-2 lg:p-3 bg-blue-50 rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm lg:text-base font-medium text-gray-900 truncate">{material.itemName}</p>
+                      <p className="text-xs text-gray-600 truncate">{material.project}</p>
+                    </div>
+                    <div className="text-right ml-2">
+                      <p className="text-sm lg:text-base font-semibold text-blue-600">{material.totalQuantity}</p>
+                      <p className="text-xs text-gray-500">{material.totalValue.toFixed(0)} RSD</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
