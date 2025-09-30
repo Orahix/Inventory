@@ -13,12 +13,39 @@ export const useInventory = () => {
     try {
       const { data, error: fetchError } = await supabase
         .from('inventory_items')
-        .select('*')
+        .select(`
+          id,
+          name,
+          category,
+          project,
+          current_stock,
+          min_stock,
+          max_stock,
+          unit_price,
+          supplier,
+          created_at,
+          updated_at
+        `)
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
       
-      setItems(data || []);
+      // Map snake_case to camelCase
+      const mappedItems = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        project: item.project,
+        currentStock: item.current_stock,
+        minStock: item.min_stock,
+        maxStock: item.max_stock,
+        unitPrice: item.unit_price,
+        supplier: item.supplier,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at
+      }));
+      
+      setItems(mappedItems);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch items';
       setError(errorMessage);
@@ -35,16 +62,55 @@ export const useInventory = () => {
     setLoading(true);
     setError(null);
     try {
+      // Map camelCase to snake_case for database
+      const dbData = {
+        name: itemData.name,
+        category: itemData.category,
+        project: itemData.project,
+        current_stock: itemData.currentStock,
+        min_stock: itemData.minStock,
+        max_stock: itemData.maxStock,
+        unit_price: itemData.unitPrice,
+        supplier: itemData.supplier
+      };
+      
       const { data, error: insertError } = await supabase
         .from('inventory_items')
-        .insert([itemData])
-        .select()
+        .insert([dbData])
+        .select(`
+          id,
+          name,
+          category,
+          project,
+          current_stock,
+          min_stock,
+          max_stock,
+          unit_price,
+          supplier,
+          created_at,
+          updated_at
+        `)
         .single();
 
       if (insertError) throw insertError;
       
-      setItems(prev => [...prev, data]);
-      return data;
+      // Map snake_case to camelCase
+      const mappedItem = {
+        id: data.id,
+        name: data.name,
+        category: data.category,
+        project: data.project,
+        currentStock: data.current_stock,
+        minStock: data.min_stock,
+        maxStock: data.max_stock,
+        unitPrice: data.unit_price,
+        supplier: data.supplier,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      };
+      
+      setItems(prev => [...prev, mappedItem]);
+      return mappedItem;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to add item';
       setError(errorMessage);
@@ -58,17 +124,56 @@ export const useInventory = () => {
     setLoading(true);
     setError(null);
     try {
+      // Map camelCase to snake_case for database
+      const dbData = {
+        name: itemData.name,
+        category: itemData.category,
+        project: itemData.project,
+        current_stock: itemData.currentStock,
+        min_stock: itemData.minStock,
+        max_stock: itemData.maxStock,
+        unit_price: itemData.unitPrice,
+        supplier: itemData.supplier
+      };
+      
       const { data, error: updateError } = await supabase
         .from('inventory_items')
-        .update(itemData)
+        .update(dbData)
         .eq('id', id)
-        .select()
+        .select(`
+          id,
+          name,
+          category,
+          project,
+          current_stock,
+          min_stock,
+          max_stock,
+          unit_price,
+          supplier,
+          created_at,
+          updated_at
+        `)
         .single();
 
       if (updateError) throw updateError;
       
-      setItems(prev => prev.map(item => item.id === id ? data : item));
-      return data;
+      // Map snake_case to camelCase
+      const mappedItem = {
+        id: data.id,
+        name: data.name,
+        category: data.category,
+        project: data.project,
+        currentStock: data.current_stock,
+        minStock: data.min_stock,
+        maxStock: data.max_stock,
+        unitPrice: data.unit_price,
+        supplier: data.supplier,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      };
+      
+      setItems(prev => prev.map(item => item.id === id ? mappedItem : item));
+      return mappedItem;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update item';
       setError(errorMessage);
