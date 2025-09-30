@@ -1,4 +1,37 @@
-const addItem = async (itemData: Omit<InventoryItem, 'id' | 'createdAt'>) => {
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import type { InventoryItem } from '../types';
+
+export const useInventory = () => {
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchItems = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('inventory_items')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (fetchError) throw fetchError;
+      
+      setItems(data || []);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch items';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const addItem = async (itemData: Omit<InventoryItem, 'id' | 'createdAt'>) => {
     setLoading(true);
     setError(null);
     try {
@@ -65,3 +98,14 @@ const addItem = async (itemData: Omit<InventoryItem, 'id' | 'createdAt'>) => {
       setLoading(false);
     }
   };
+
+  return {
+    items,
+    loading,
+    error,
+    addItem,
+    updateItem,
+    deleteItem,
+    refetch: fetchItems
+  };
+};
