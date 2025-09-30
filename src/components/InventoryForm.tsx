@@ -7,9 +7,17 @@ interface InventoryFormProps {
   onSubmit: (item: Omit<InventoryItem, 'id' | 'createdAt'>) => void;
   onCancel: () => void;
   onAddSupplier: (supplier: string) => void;
+  isSubmitting?: boolean;
 }
 
-export const InventoryForm: React.FC<InventoryFormProps> = ({ item, suppliers, onSubmit, onCancel, onAddSupplier }) => {
+export const InventoryForm: React.FC<InventoryFormProps> = ({ 
+  item, 
+  suppliers, 
+  onSubmit, 
+  onCancel, 
+  onAddSupplier, 
+  isSubmitting = false 
+}) => {
   const [formData, setFormData] = useState({
     name: item?.name || '',
     category: item?.category || '',
@@ -205,15 +213,17 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({ item, suppliers, o
         <button
           type="button"
           onClick={onCancel}
+          disabled={isSubmitting}
           className="px-3 lg:px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-sm lg:text-base"
         >
           Otkaži
         </button>
         <button
           type="submit"
+          disabled={isSubmitting}
           className="px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm lg:text-base"
         >
-          {item ? 'Ažuriraj' : 'Dodaj'} stavku
+          {isSubmitting ? 'Čuva se...' : `${item ? 'Ažuriraj' : 'Dodaj'} stavku`}
         </button>
       </div>
     </form>

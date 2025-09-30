@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useInventory } from './hooks/useInventory';
+import { useStaff } from './hooks/useStaff';
+import { useTransactions } from './hooks/useTransactions';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { InventoryList } from './components/InventoryList';
@@ -11,78 +14,44 @@ function App() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Sample data
-  const [inventory, setInventory] = useState<InventoryItem[]>([
-    {
-      id: '1',
-      name: 'Monokristalinični solarni panel 450W',
-      category: 'Solarni paneli',
-      currentStock: 150,
-      minStock: 10,
-      maxStock: 500,
-      unitPrice: 35000,
-      supplier: 'Solar Tech Solutions',
-      createdAt: '2024-01-15',
-    },
-    {
-      id: '2',
-      name: 'String inverter 10kW',
-      category: 'Inverteri',
-      currentStock: 8,
-      minStock: 5,
-      maxStock: 50,
-      unitPrice: 180000,
-      supplier: 'Power Electronics',
-      createdAt: '2024-01-10',
-      project: 'Solarna elektrana Novi Sad',
-    },
-    {
-      id: '3',
-      name: 'DC kabl 4mm² crni',
-      category: 'Kablovi',
-      currentStock: 2000,
-      minStock: 500,
-      maxStock: 5000,
-      unitPrice: 120,
-      supplier: 'Cable Systems',
-      createdAt: '2024-01-05',
-      project: 'Solarna elektrana Beograd',
-    },
-    {
-      id: '4',
-      name: 'Junction box IP67',
-      category: 'Spojne kutije',
-      currentStock: 45,
-      minStock: 20,
-      maxStock: 200,
-      unitPrice: 2500,
-      supplier: 'Electrical Components',
-      createdAt: '2024-01-12',
-    },
-    {
-      id: '5',
-      name: 'DC prekidač 32A',
-      category: 'Prekidačka oprema',
-      currentStock: 12,
-      minStock: 10,
-      maxStock: 100,
-      unitPrice: 8500,
-      supplier: 'Switch & Control',
-      createdAt: '2024-01-08',
-      project: 'Solarna elektrana Kragujevac',
-    },
-    {
-      id: '6',
-      name: 'Aluminijumska šina za montažu',
-      category: 'Montažni sistemi',
-      currentStock: 300,
-      minStock: 100,
-      maxStock: 1000,
-      unitPrice: 1200,
-      supplier: 'Mounting Solutions',
-      createdAt: '2024-01-20',
-    },
-  ]);
+  // Use database hooks
+  const { items: inventory, loading: inventoryLoading, error: inventoryError, addItem, updateItem, deleteItem } = useInventory();
+  const { staff, loading: staffLoading, error: staffError, addStaff, updateStaff, deleteStaff } = useStaff();
+  const { transactions, loading: transactionsLoading, error: transactionsError, addTransaction } = useTransactions();
+  
+  // Show loading state
+  if (inventoryLoading || staffLoading || transactionsLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading inventory system...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (inventoryError || staffError || transactionsError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="text-red-600 mb-4">
+            <svg className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Database Connection Error</h2>
+          <p className="text-gray-600 mb-4">
+            {inventoryError || staffError || transactionsError}
+          </p>
+          <p className="text-sm text-gray-500">
+            Please make sure your Supabase database is set up correctly and the migration has been run.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Get unique suppliers from inventory
   const suppliers = Array.from(new Set(inventory.map(item => item.supplier))).filter(Boolean).sort();
@@ -92,100 +61,32 @@ function App() {
     // since suppliers are derived from inventory items
   };
 
-  const [staff, setStaff] = useState<StaffMember[]>([
-    {
-      id: '1',
-      name: 'Marko Petrović',
-      email: 'marko.petrovic@kompanija.com',
-      role: 'Admin',
-      department: 'Operacije',
-      createdAt: '2024-01-01',
-    },
-    {
-      id: '2',
-      name: 'Ana Jovanović',
-      email: 'ana.jovanovic@kompanija.com',
-      role: 'Manager',
-      department: 'Magacin',
-      createdAt: '2024-01-08',
-    },
-    {
-      id: '3',
-      name: 'Stefan Nikolić',
-      email: 'stefan.nikolic@kompanija.com',
-      role: 'Staff',
-      department: 'Inventar',
-      createdAt: '2024-01-12',
-    },
-  ]);
-
-  const [transactions, setTransactions] = useState<Transaction[]>([
-  ]);
-
-  const generateId = () => Math.random().toString(36).substr(2, 9);
-
   const handleAddItem = (itemData: Omit<InventoryItem, 'id' | 'createdAt'>) => {
-    const newItem: InventoryItem = {
-      ...itemData,
-      id: generateId(),
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-    setInventory(prev => [...prev, newItem]);
+    return addItem(itemData);
   };
 
   const handleUpdateItem = (id: string, itemData: Omit<InventoryItem, 'id' | 'createdAt'>) => {
-    setInventory(prev => prev.map(item => 
-      item.id === id ? { ...item, ...itemData } : item
-    ));
+    return updateItem(id, itemData);
   };
 
   const handleDeleteItem = (id: string) => {
-    setInventory(prev => prev.filter(item => item.id !== id));
+    return deleteItem(id);
   };
 
   const handleAddStaff = (staffData: Omit<StaffMember, 'id' | 'createdAt'>) => {
-    const newStaff: StaffMember = {
-      ...staffData,
-      id: generateId(),
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-    setStaff(prev => [...prev, newStaff]);
+    return addStaff(staffData);
   };
 
   const handleUpdateStaff = (id: string, staffData: Omit<StaffMember, 'id' | 'createdAt'>) => {
-    setStaff(prev => prev.map(member => 
-      member.id === id ? { ...member, ...staffData } : member
-    ));
+    return updateStaff(id, staffData);
   };
 
   const handleDeleteStaff = (id: string) => {
-    setStaff(prev => prev.filter(member => member.id !== id));
+    return deleteStaff(id);
   };
 
   const handleTransaction = (transactionData: Omit<Transaction, 'id' | 'date'>) => {
-    const newTransaction: Transaction = {
-      ...transactionData,
-      id: generateId(),
-      date: new Date().toISOString().split('T')[0],
-    };
-
-    setTransactions(prev => [newTransaction, ...prev]);
-
-    // Update inventory stock
-    setInventory(prev => prev.map(item => {
-      if (item.id === transactionData.itemId) {
-        const newStock = transactionData.type === 'input'
-          ? item.currentStock + transactionData.quantity
-          : item.currentStock - transactionData.quantity;
-        
-        return { 
-          ...item, 
-          currentStock: Math.max(0, newStock),
-          project: transactionData.project
-        };
-      }
-      return item;
-    }));
+    return addTransaction(transactionData);
   };
 
   const renderCurrentView = () => {

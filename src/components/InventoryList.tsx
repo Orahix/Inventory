@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, CreditCard as Edit, Trash2, Search, Filter } from 'lucide-react';
+import { Plus, CreditCard as Edit, Trash2, Search, Filter, AlertCircle } from 'lucide-react';
 import { InventoryItem } from '../types';
 import { Modal } from './Modal';
 import { InventoryForm } from './InventoryForm';
@@ -27,6 +27,8 @@ export const InventoryList: React.FC<InventoryListProps> = ({
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProject, setSelectedProject] = useState<string>('all');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   
   // Get unique projects from transactions
   const projects = Array.from(new Set(transactions.map(t => t.project))).filter(Boolean);
@@ -49,13 +51,36 @@ export const InventoryList: React.FC<InventoryListProps> = ({
   };
 
   const handleSubmit = (itemData: Omit<InventoryItem, 'id' | 'createdAt'>) => {
-    if (editingItem) {
-      onUpdateItem(editingItem.id, itemData);
-    } else {
-      onAddItem(itemData);
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    const operation = editingItem 
+      ? onUpdateItem(editingItem.id, itemData)
+      : onAddItem(itemData);
+    
+    Promise.resolve(operation)
+      .then(() => {
+        setIsModalOpen(false);
+        setEditingItem(null);
+      })
+      .catch((error) => {
+        setSubmitError(error.message || 'An error occurred');
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
+  };
+
+  const handleDelete = async (id: string, itemName: string) => {
+    if (!confirm(`Are you sure you want to delete "${itemName}"? This action cannot be undone.`)) {
+      return;
     }
-    setIsModalOpen(false);
-    setEditingItem(null);
+    
+    try {
+      await onDeleteItem(id);
+    } catch (error) {
+      alert(`Failed to delete item: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   return (
@@ -144,12 +169,14 @@ export const InventoryList: React.FC<InventoryListProps> = ({
                       <button
                         onClick={() => handleEditItem(item)}
                         className="p-1 text-blue-600 hover:bg-blue-100 rounded text-sm lg:text-base"
+                       title="Edit item"
                       >
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => onDeleteItem(item.id)}
+                       onClick={() => handleDelete(item.id, item.name)}
                         className="p-1 text-red-600 hover:bg-red-100 rounded text-sm lg:text-base"
+                       title="Delete item"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -171,20 +198,31 @@ export const InventoryList: React.FC<InventoryListProps> = ({
       <Modal
         isOpen={isModalOpen}
         onClose={() => {
+          if (isSubmitting) return; // Prevent closing while submitting
           setIsModalOpen(false);
           setEditingItem(null);
+          setSubmitError(null);
         }}
         title={editingItem ? 'Izmeni stavku' : 'Dodaj novu stavku'}
       >
+        {submitError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+            <span className="text-red-700 text-sm">{submitError}</span>
+          </div>
+        )}
         <InventoryForm
           item={editingItem}
           suppliers={suppliers}
           onSubmit={handleSubmit}
           onCancel={() => {
+            if (isSubmitting) return; // Prevent canceling while submitting
             setIsModalOpen(false);
             setEditingItem(null);
+            setSubmitError(null);
           }}
           onAddSupplier={onAddSupplier}
+          isSubmitting={isSubmitting}
         />
       </Modal>
     </div>
