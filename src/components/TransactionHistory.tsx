@@ -108,7 +108,6 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Osoblje</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Projekat</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Komentar</th>
-                <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Komentar</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Detalji</th>
               </tr>
             </thead>
@@ -153,15 +152,6 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
                   <td className="py-3 px-2 lg:px-4 text-gray-600 text-xs lg:text-sm">
                     <div className="max-w-[120px] lg:max-w-none truncate" title={transaction.project}>
                       {transaction.project}
-                    </div>
-                  </td>
-                  <td className="py-3 px-2 lg:px-4 text-gray-600 text-xs lg:text-sm">
-                    <div className="max-w-[100px] lg:max-w-none truncate" title={transaction.comment || 'Nema komentara'}>
-                      {transaction.comment ? (
-                        <span className="text-blue-600">Ima komentar</span>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
                     </div>
                   </td>
                   <td className="py-3 px-2 lg:px-4 text-gray-600 text-xs lg:text-sm">
