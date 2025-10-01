@@ -1,72 +1,145 @@
 import React, { useState } from 'react';
-import { Search, TrendingUp, TrendingDown, Calendar, Filter, Eye, X } from 'lucide-react';
+import { Search, Filter, TrendingDown, Package, Calendar, Eye } from 'lucide-react';
 import { Transaction } from '../types';
 import { Modal } from './Modal';
 
-interface TransactionHistoryProps {
+interface ClientsProps {
   transactions: Transaction[];
 }
 
-export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transactions }) => {
+export const Clients: React.FC<ClientsProps> = ({ transactions }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'input' | 'output'>('all');
-  const [dateRange, setDateRange] = useState('all');
+  const [selectedProject, setSelectedProject] = useState<string>('all');
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
-  const filteredTransactions = transactions
+  // Get unique projects from output transactions
+  const projects = Array.from(new Set(
+    transactions
+      .filter(t => t.type === 'output')
+      .map(t => t.project)
+  )).filter(Boolean).sort();
+
+  // Filter transactions to show only outputs
+  const outputTransactions = transactions.filter(t => t.type === 'output');
+
+  const filteredTransactions = outputTransactions
     .filter(transaction => {
       const matchesSearch = 
         transaction.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         transaction.staffName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         transaction.project.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesType = typeFilter === 'all' || transaction.type === typeFilter;
+      const matchesProject = selectedProject === 'all' || transaction.project === selectedProject;
       
-      return matchesSearch && matchesType;
+      return matchesSearch && matchesProject;
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const totalValue = filteredTransactions.reduce((sum, t) => sum + t.totalValue, 0);
-  const inputTransactions = filteredTransactions.filter(t => t.type === 'input');
-  const outputTransactions = filteredTransactions.filter(t => t.type === 'output');
+  // Calculate project statistics
+  const projectStats = projects.map(project => {
+    const projectTransactions = outputTransactions.filter(t => t.project === project);
+    const totalValue = projectTransactions.reduce((sum, t) => sum + t.totalValue, 0);
+    const totalItems = projectTransactions.reduce((sum, t) => sum + t.quantity, 0);
+    const uniqueComponents = new Set(projectTransactions.map(t => t.itemName)).size;
+    
+    return {
+      project,
+      totalValue,
+      totalItems,
+      uniqueComponents,
+      transactionCount: projectTransactions.length
+    };
+  }).sort((a, b) => b.totalValue - a.totalValue);
+
+  const selectedProjectStats = selectedProject === 'all' 
+    ? {
+        totalValue: outputTransactions.reduce((sum, t) => sum + t.totalValue, 0),
+        totalItems: outputTransactions.reduce((sum, t) => sum + t.quantity, 0),
+        uniqueComponents: new Set(outputTransactions.map(t => t.itemName)).size,
+        transactionCount: outputTransactions.length
+      }
+    : projectStats.find(p => p.project === selectedProject) || {
+        totalValue: 0,
+        totalItems: 0,
+        uniqueComponents: 0,
+        transactionCount: 0
+      };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Istorija transakcija</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Klijenti - Izlaz materijala</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow-sm p-3 lg:p-4">
+      {/* Project Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg shadow-sm p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs lg:text-sm text-gray-600">Ukupno transakcija</p>
-              <p className="text-xl lg:text-2xl font-bold text-gray-900">{filteredTransactions.length}</p>
+              <p className="text-sm text-gray-600">Ukupna vrednost</p>
+              <p className="text-xl font-bold text-blue-600">{selectedProjectStats.totalValue.toFixed(0)} RSD</p>
             </div>
-            <Calendar className="h-6 w-6 lg:h-8 lg:w-8 text-blue-600" />
+            <TrendingDown className="h-8 w-8 text-blue-600" />
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-3 lg:p-4">
+        <div className="bg-white rounded-lg shadow-sm p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs lg:text-sm text-gray-600">Ulaz robe</p>
-              <p className="text-xl lg:text-2xl font-bold text-green-600">{inputTransactions.length}</p>
+              <p className="text-sm text-gray-600">Ukupno stavki</p>
+              <p className="text-xl font-bold text-green-600">{selectedProjectStats.totalItems}</p>
             </div>
-            <TrendingUp className="h-6 w-6 lg:h-8 lg:w-8 text-green-600" />
+            <Package className="h-8 w-8 text-green-600" />
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-3 lg:p-4">
+        <div className="bg-white rounded-lg shadow-sm p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs lg:text-sm text-gray-600">Izlaz robe</p>
-              <p className="text-xl lg:text-2xl font-bold text-red-600">{outputTransactions.length}</p>
+              <p className="text-sm text-gray-600">Različitih komponenti</p>
+              <p className="text-xl font-bold text-purple-600">{selectedProjectStats.uniqueComponents}</p>
             </div>
-            <TrendingDown className="h-6 w-6 lg:h-8 lg:w-8 text-red-600" />
+            <Package className="h-8 w-8 text-purple-600" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Broj transakcija</p>
+              <p className="text-xl font-bold text-orange-600">{selectedProjectStats.transactionCount}</p>
+            </div>
+            <Calendar className="h-8 w-8 text-orange-600" />
           </div>
         </div>
       </div>
+
+      {/* Project Overview Cards */}
+      {selectedProject === 'all' && (
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Pregled projekata</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {projectStats.slice(0, 6).map((stats) => (
+              <div key={stats.project} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <h4 className="font-semibold text-gray-900 mb-2 truncate" title={stats.project}>
+                  {stats.project}
+                </h4>
+                <div className="space-y-1 text-sm text-gray-600">
+                  <p>Vrednost: <span className="font-medium text-blue-600">{stats.totalValue.toFixed(0)} RSD</span></p>
+                  <p>Stavki: <span className="font-medium">{stats.totalItems}</span></p>
+                  <p>Komponenti: <span className="font-medium">{stats.uniqueComponents}</span></p>
+                </div>
+                <button
+                  onClick={() => setSelectedProject(stats.project)}
+                  className="mt-3 w-full px-3 py-1 bg-blue-50 text-blue-600 rounded text-sm hover:bg-blue-100 transition-colors"
+                >
+                  Prikaži detalje
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -74,7 +147,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Pretraži transakcije..."
+              placeholder="Pretraži izlaze materijala..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
@@ -84,13 +157,14 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
           <div className="flex items-center space-x-2">
             <Filter className="h-5 w-5 text-gray-400" />
             <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value as 'all' | 'input' | 'output')}
+              value={selectedProject}
+              onChange={(e) => setSelectedProject(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
             >
-              <option value="all">Svi tipovi</option>
-              <option value="input">Ulaz robe</option>
-              <option value="output">Izlaz robe</option>
+              <option value="all">Svi projekti</option>
+              {projects.map(project => (
+                <option key={project} value={project}>{project}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -100,14 +174,12 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Datum</th>
-                <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Tip</th>
+                <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Projekat</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Stavka</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Količina</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Cena</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Vrednost</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Osoblje</th>
-                <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Projekat</th>
-                <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Komentar</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Detalji</th>
               </tr>
             </thead>
@@ -117,50 +189,24 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
                   <td className="py-3 px-2 lg:px-4 text-xs lg:text-sm text-gray-600">
                     {new Date(transaction.date).toLocaleDateString()}
                   </td>
-                  <td className="py-3 px-2 lg:px-4">
-                    <div className="flex items-center">
-                      {transaction.type === 'input' ? (
-                        <>
-                          <TrendingUp className="h-3 w-3 lg:h-4 lg:w-4 text-green-600 mr-1 lg:mr-2" />
-                          <span className="text-green-600 font-medium text-xs lg:text-sm">Ulaz</span>
-                        </>
-                      ) : (
-                        <>
-                          <TrendingDown className="h-3 w-3 lg:h-4 lg:w-4 text-red-600 mr-1 lg:mr-2" />
-                          <span className="text-red-600 font-medium text-xs lg:text-sm">Izlaz</span>
-                        </>
-                      )}
+                  <td className="py-3 px-2 lg:px-4 font-medium text-gray-900 text-xs lg:text-sm">
+                    <div className="max-w-[120px] lg:max-w-none truncate" title={transaction.project}>
+                      {transaction.project}
                     </div>
                   </td>
-                  <td className="py-3 px-2 lg:px-4 font-medium text-gray-900 text-xs lg:text-sm">
+                  <td className="py-3 px-2 lg:px-4 text-gray-600 text-xs lg:text-sm">
                     <div className="max-w-[120px] lg:max-w-none truncate" title={transaction.itemName}>
                       {transaction.itemName}
                     </div>
                   </td>
-                  <td className="py-3 px-2 lg:px-4 text-gray-600 text-xs lg:text-sm">
-                    <span className={`font-medium ${transaction.type === 'input' ? 'text-green-600' : 'text-red-600'}`}>
-                      {transaction.type === 'input' ? '+' : '-'}{transaction.quantity}
-                    </span>
+                  <td className="py-3 px-2 lg:px-4 text-red-600 font-medium text-xs lg:text-sm">
+                    -{transaction.quantity}
                   </td>
                   <td className="py-3 px-2 lg:px-4 text-gray-600 text-xs lg:text-sm">{transaction.unitPrice.toFixed(0)}</td>
                   <td className="py-3 px-2 lg:px-4 text-gray-900 font-medium text-xs lg:text-sm">{transaction.totalValue.toFixed(0)}</td>
                   <td className="py-3 px-2 lg:px-4 text-gray-600 text-xs lg:text-sm">
                     <div className="max-w-[100px] lg:max-w-none truncate" title={transaction.staffName}>
                       {transaction.staffName}
-                    </div>
-                  </td>
-                  <td className="py-3 px-2 lg:px-4 text-gray-600 text-xs lg:text-sm">
-                    <div className="max-w-[120px] lg:max-w-none truncate" title={transaction.project}>
-                      {transaction.project}
-                    </div>
-                  </td>
-                  <td className="py-3 px-2 lg:px-4 text-gray-600 text-xs lg:text-sm">
-                    <div className="max-w-[100px] lg:max-w-none truncate" title={transaction.comment || 'Nema komentara'}>
-                      {transaction.comment ? (
-                        <span className="text-blue-600">Ima komentar</span>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
                     </div>
                   </td>
                   <td className="py-3 px-2 lg:px-4">
@@ -180,7 +226,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
 
         {filteredTransactions.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            {searchTerm || typeFilter !== 'all' ? 'Nema transakcija koje odgovaraju filterima.' : 'Nema pronađenih transakcija.'}
+            {searchTerm || selectedProject !== 'all' ? 'Nema izlaza materijala koji odgovaraju filterima.' : 'Nema pronađenih izlaza materijala.'}
           </div>
         )}
       </div>
@@ -188,7 +234,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
       <Modal
         isOpen={!!selectedTransaction}
         onClose={() => setSelectedTransaction(null)}
-        title="Detalji transakcije"
+        title="Detalji izlaza materijala"
       >
         {selectedTransaction && (
           <div className="space-y-4">
@@ -200,18 +246,13 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tip transakcije</label>
                 <div className="flex items-center">
-                  {selectedTransaction.type === 'input' ? (
-                    <>
-                      <TrendingUp className="h-4 w-4 text-green-600 mr-2" />
-                      <span className="text-green-600 font-medium">Ulaz robe</span>
-                    </>
-                  ) : (
-                    <>
-                      <TrendingDown className="h-4 w-4 text-red-600 mr-2" />
-                      <span className="text-red-600 font-medium">Izlaz robe</span>
-                    </>
-                  )}
+                  <TrendingDown className="h-4 w-4 text-red-600 mr-2" />
+                  <span className="text-red-600 font-medium">Izlaz robe</span>
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Projekat</label>
+                <p className="text-sm text-gray-900">{selectedTransaction.project}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Stavka</label>
@@ -219,9 +260,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Količina</label>
-                <p className={`text-sm font-medium ${selectedTransaction.type === 'input' ? 'text-green-600' : 'text-red-600'}`}>
-                  {selectedTransaction.type === 'input' ? '+' : '-'}{selectedTransaction.quantity}
-                </p>
+                <p className="text-sm font-medium text-red-600">-{selectedTransaction.quantity}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Jedinična cena</label>
@@ -230,10 +269,6 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Ukupna vrednost</label>
                 <p className="text-sm font-semibold text-gray-900">{selectedTransaction.totalValue.toFixed(2)} RSD</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Projekat</label>
-                <p className="text-sm text-gray-900">{selectedTransaction.project}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Osoblje</label>

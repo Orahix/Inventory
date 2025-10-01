@@ -8,6 +8,7 @@ import { InventoryList } from './components/InventoryList';
 import { StockTransactions } from './components/StockTransactions';
 import { StaffManagement } from './components/StaffManagement';
 import { TransactionHistory } from './components/TransactionHistory';
+import { Clients } from './components/Clients';
 import { InventoryItem, StaffMember, Transaction } from './types';
 
 function App() {
@@ -134,6 +135,8 @@ function App() {
         );
       case 'history':
         return <TransactionHistory transactions={transactions} />;
+      case 'clients':
+        return <Clients transactions={transactions} />;
       default:
         return <Dashboard inventory={inventory} transactions={transactions} />;
     }
