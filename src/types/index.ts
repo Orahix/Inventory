@@ -32,4 +32,5 @@ export interface Transaction {
   staffId: string;
   staffName: string;
   date: string;
+  comment?: string;
 }

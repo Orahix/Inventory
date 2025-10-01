@@ -20,6 +20,7 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
     unitPrice: 0,
     project: '',
     staffId: '',
+    comment: '',
   });
 
   const selectedItem = inventory.find(item => item.id === formData.itemId);
@@ -41,6 +42,7 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
       project: formData.project,
       staffId: formData.staffId,
       staffName: selectedStaff.name,
+      comment: formData.comment,
     };
 
     onTransaction(transaction);
@@ -50,6 +52,7 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
       unitPrice: 0,
       project: '',
       staffId: '',
+      comment: '',
     });
   };
 
@@ -155,6 +158,20 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
               required
               placeholder="Unesite naziv projekta..."
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Komentar
+            </label>
+            <textarea
+              name="comment"
+              value={formData.comment}
+              onChange={handleChange}
+              rows={3}
+              placeholder="Dodajte komentar o transakciji..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base resize-none"
             />
           </div>
 

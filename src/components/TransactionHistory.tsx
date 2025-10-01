@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Search, TrendingUp, TrendingDown, Calendar, Filter } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, Calendar, Filter, Eye, X } from 'lucide-react';
 import { Transaction } from '../types';
+import { Modal } from './Modal';
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
@@ -10,13 +11,14 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'input' | 'output'>('all');
   const [dateRange, setDateRange] = useState('all');
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const filteredTransactions = transactions
     .filter(transaction => {
       const matchesSearch = 
         transaction.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         transaction.staffName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        transaction.reason.toLowerCase().includes(searchTerm.toLowerCase());
+        transaction.project.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesType = typeFilter === 'all' || transaction.type === typeFilter;
       
@@ -105,6 +107,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Vrednost</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Osoblje</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Projekat</th>
+                <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Detalji</th>
               </tr>
             </thead>
             <tbody>
@@ -150,6 +153,15 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
                       {transaction.project}
                     </div>
                   </td>
+                  <td className="py-3 px-2 lg:px-4">
+                    <button
+                      onClick={() => setSelectedTransaction(transaction)}
+                      className="p-1 text-blue-600 hover:bg-blue-100 rounded transition-colors"
+                      title="Prikaži detalje"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -162,6 +174,73 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={!!selectedTransaction}
+        onClose={() => setSelectedTransaction(null)}
+        title="Detalji transakcije"
+      >
+        {selectedTransaction && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Datum</label>
+                <p className="text-sm text-gray-900">{selectedTransaction.date}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tip transakcije</label>
+                <div className="flex items-center">
+                  {selectedTransaction.type === 'input' ? (
+                    <>
+                      <TrendingUp className="h-4 w-4 text-green-600 mr-2" />
+                      <span className="text-green-600 font-medium">Ulaz robe</span>
+                    </>
+                  ) : (
+                    <>
+                      <TrendingDown className="h-4 w-4 text-red-600 mr-2" />
+                      <span className="text-red-600 font-medium">Izlaz robe</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Stavka</label>
+                <p className="text-sm text-gray-900">{selectedTransaction.itemName}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Količina</label>
+                <p className={`text-sm font-medium ${selectedTransaction.type === 'input' ? 'text-green-600' : 'text-red-600'}`}>
+                  {selectedTransaction.type === 'input' ? '+' : '-'}{selectedTransaction.quantity}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Jedinična cena</label>
+                <p className="text-sm text-gray-900">{selectedTransaction.unitPrice.toFixed(2)} RSD</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ukupna vrednost</label>
+                <p className="text-sm font-semibold text-gray-900">{selectedTransaction.totalValue.toFixed(2)} RSD</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Projekat</label>
+                <p className="text-sm text-gray-900">{selectedTransaction.project}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Osoblje</label>
+                <p className="text-sm text-gray-900">{selectedTransaction.staffName}</p>
+              </div>
+            </div>
+            {selectedTransaction.comment && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Komentar</label>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-sm text-gray-900 whitespace-pre-wrap">{selectedTransaction.comment}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
