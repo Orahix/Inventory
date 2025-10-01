@@ -18,7 +18,19 @@ export const useTransactions = () => {
       
       const { data, error: fetchError } = await supabase
         .from('transactions')
-        .select('*')
+        .select(`
+          id,
+          item_id,
+          item_name,
+          type,
+          quantity,
+          unit_price,
+          total_value,
+          project,
+          staff_id,
+          staff_name,
+          created_at
+        `)
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
@@ -35,7 +47,6 @@ export const useTransactions = () => {
         staffId: item.staff_id || '',
         staffName: item.staff_name,
         date: new Date(item.created_at).toLocaleDateString(),
-        comment: item.comment || undefined,
       }));
 
       setTransactions(formattedTransactions);
@@ -65,7 +76,6 @@ export const useTransactions = () => {
           project: transactionData.project,
           staff_id: transactionData.staffId,
           staff_name: transactionData.staffName,
-          comment: transactionData.comment,
         }])
         .select()
         .single();
@@ -104,7 +114,6 @@ export const useTransactions = () => {
         staffId: transactionResult.staff_id || '',
         staffName: transactionResult.staff_name,
         date: new Date(transactionResult.created_at).toLocaleDateString(),
-        comment: transactionResult.comment || undefined,
       };
 
       setTransactions(prev => [newTransaction, ...prev]);
