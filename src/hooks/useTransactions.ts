@@ -29,6 +29,7 @@ export const useTransactions = () => {
           project,
           staff_id,
           staff_name,
+          comment,
           created_at
         `)
         .order('created_at', { ascending: false });
@@ -47,6 +48,7 @@ export const useTransactions = () => {
         staffId: item.staff_id || '',
         staffName: item.staff_name,
         date: new Date(item.created_at).toLocaleString(),
+        comment: item.comment,
       }));
 
       setTransactions(formattedTransactions);
@@ -76,6 +78,7 @@ export const useTransactions = () => {
           project: transactionData.project,
           staff_id: transactionData.staffId,
           staff_name: transactionData.staffName,
+          comment: transactionData.comment,
         }])
         .select()
         .single();
@@ -114,6 +117,7 @@ export const useTransactions = () => {
         staffId: transactionResult.staff_id || '',
         staffName: transactionResult.staff_name,
         date: new Date(transactionResult.created_at).toLocaleString(),
+        comment: transactionResult.comment,
       };
 
       setTransactions(prev => [newTransaction, ...prev]);
