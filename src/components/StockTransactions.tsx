@@ -5,6 +5,7 @@ interface StockTransactionsProps {
   type: 'input' | 'output';
   inventory: InventoryItem[];
   staff: StaffMember[];
+  transactions?: Transaction[];
   onTransaction: (transaction: Omit<Transaction, 'id' | 'date'>) => void;
 }
 
@@ -12,6 +13,7 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
   type,
   inventory,
   staff,
+  transactions = [],
   onTransaction,
 }) => {
   const [formData, setFormData] = useState({
@@ -27,8 +29,10 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
 
   const selectedItem = inventory.find(item => item.id === formData.itemId);
   
-  // Get unique projects from inventory items
-  const projects = Array.from(new Set(inventory.map(item => item.project).filter(Boolean))).sort();
+  // Get unique projects from inventory items and transactions
+  const inventoryProjects = inventory.map(item => item.project).filter(Boolean);
+  const transactionProjects = transactions?.map(t => t.project).filter(Boolean) || [];
+  const projects = Array.from(new Set([...inventoryProjects, ...transactionProjects])).sort();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

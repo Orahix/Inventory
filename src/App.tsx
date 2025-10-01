@@ -112,6 +112,7 @@ function App() {
             type="input"
             inventory={inventory}
             staff={staff}
+            transactions={transactions}
             onTransaction={handleTransaction}
           />
         );
@@ -121,6 +122,7 @@ function App() {
             type="output"
             inventory={inventory}
             staff={staff}
+            transactions={transactions}
             onTransaction={handleTransaction}
           />
         );
