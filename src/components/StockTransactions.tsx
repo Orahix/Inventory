@@ -22,8 +22,13 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
     staffId: '',
     comment: '',
   });
+  const [isCustomProject, setIsCustomProject] = useState(false);
+  const [customProject, setCustomProject] = useState('');
 
   const selectedItem = inventory.find(item => item.id === formData.itemId);
+  
+  // Get unique projects from inventory items
+  const projects = Array.from(new Set(inventory.map(item => item.project).filter(Boolean))).sort();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +37,9 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
     const selectedStaff = staff.find(s => s.id === formData.staffId);
     if (!selectedStaff) return;
 
+    const finalProject = isCustomProject ? customProject : formData.project;
+    if (!finalProject.trim()) return;
+
     const transaction: Omit<Transaction, 'id' | 'date'> = {
       itemId: formData.itemId,
       itemName: selectedItem.name,
@@ -39,7 +47,7 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
       quantity: formData.quantity,
       unitPrice: formData.unitPrice || selectedItem.unitPrice,
       totalValue: formData.quantity * (formData.unitPrice || selectedItem.unitPrice),
-      project: formData.project,
+      project: finalProject,
       staffId: formData.staffId,
       staffName: selectedStaff.name,
       comment: formData.comment,
@@ -54,10 +62,19 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
       staffId: '',
       comment: '',
     });
+    setIsCustomProject(false);
+    setCustomProject('');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    if (name === 'project' && value === 'custom') {
+      setIsCustomProject(true);
+      return;
+    }
+    if (name === 'project') {
+      setIsCustomProject(false);
+    }
     setFormData(prev => ({
       ...prev,
       [name]: name === 'quantity' || name === 'unitPrice' ? Number(value) : value,
@@ -150,15 +167,45 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Naziv projekta *
             </label>
-            <input
-              type="text"
-              name="project"
-              value={formData.project}
-              onChange={handleChange}
-              required
-              placeholder="Unesite naziv projekta..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
-            />
+            {!isCustomProject ? (
+              <select
+                name="project"
+                value={formData.project}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+              >
+                <option value="">Izaberi projekat...</option>
+                {projects.map(project => (
+                  <option key={project} value={project}>
+                    {project}
+                  </option>
+                ))}
+                <option value="custom">+ Dodaj novi projekat</option>
+              </select>
+            ) : (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={customProject}
+                  onChange={(e) => setCustomProject(e.target.value)}
+                  placeholder="Unesite naziv novog projekta..."
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCustomProject(false);
+                    setCustomProject('');
+                    setFormData(prev => ({ ...prev, project: '' }));
+                  }}
+                  className="text-xs lg:text-sm text-blue-600 hover:text-blue-800"
+                >
+                  ← Nazad na listu projekata
+                </button>
+              </div>
+            )}
           </div>
 
           <div>
@@ -204,7 +251,7 @@ export const StockTransactions: React.FC<StockTransactionsProps> = ({
           <div className="flex justify-end">
             <button
               type="submit"
-              disabled={!formData.itemId || !formData.staffId || formData.quantity <= 0 || !formData.project.trim()}
+              disabled={!formData.itemId || !formData.staffId || formData.quantity <= 0 || (!formData.project.trim() && !customProject.trim())}
               className={`px-4 lg:px-6 py-2 text-white rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm lg:text-base ${buttonColor}`}
             >
               Obradi {title.toLowerCase()}
