@@ -187,7 +187,7 @@ export const Clients: React.FC<ClientsProps> = ({ transactions }) => {
               {filteredTransactions.map((transaction) => (
                 <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-2 lg:px-4 text-xs lg:text-sm text-gray-600">
-                    {new Date(transaction.date).toLocaleDateString()}
+                    {transaction.date}
                   </td>
                   <td className="py-3 px-2 lg:px-4 font-medium text-gray-900 text-xs lg:text-sm">
                     <div className="max-w-[120px] lg:max-w-none truncate" title={transaction.project}>

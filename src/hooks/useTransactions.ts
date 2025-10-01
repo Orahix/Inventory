@@ -46,7 +46,7 @@ export const useTransactions = () => {
         project: item.project,
         staffId: item.staff_id || '',
         staffName: item.staff_name,
-        date: new Date(item.created_at).toLocaleDateString(),
+        date: new Date(item.created_at).toLocaleString(),
       }));
 
       setTransactions(formattedTransactions);
@@ -113,7 +113,7 @@ export const useTransactions = () => {
         project: transactionResult.project,
         staffId: transactionResult.staff_id || '',
         staffName: transactionResult.staff_name,
-        date: new Date(transactionResult.created_at).toLocaleDateString(),
+        date: new Date(transactionResult.created_at).toLocaleString(),
       };
 
       setTransactions(prev => [newTransaction, ...prev]);

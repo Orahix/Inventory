@@ -115,7 +115,7 @@ export const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transact
               {filteredTransactions.map((transaction) => (
                 <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-2 lg:px-4 text-xs lg:text-sm text-gray-600">
-                    {new Date(transaction.date).toLocaleDateString()}
+                    {transaction.date}
                   </td>
                   <td className="py-3 px-2 lg:px-4">
                     <div className="flex items-center">
