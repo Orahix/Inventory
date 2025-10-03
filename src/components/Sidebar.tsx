@@ -29,8 +29,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile menu button */}
       <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Package className="h-6 w-6 text-blue-600" />
-          <span className="text-lg font-bold text-gray-800">InventarPro</span>
+          <img 
+            src="/cropped-azimut-logo-A-300x300-removebg-preview.png" 
+            alt="Azimut Logo" 
+            className="h-8 w-8"
+          />
+          <span className="text-lg font-bold text-gray-800">Azimut Inventar</span>
         </div>
         <button
           onClick={onToggleMobileMenu}
@@ -48,8 +52,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       `}>
         <div className="hidden lg:block p-6 border-b">
           <div className="flex items-center space-x-2">
-            <Package className="h-8 w-8 text-blue-600" />
-            <span className="text-xl font-bold text-gray-800">InventarPro</span>
+            <img 
+              src="/cropped-azimut-logo-A-300x300-removebg-preview.png" 
+              alt="Azimut Logo" 
+              className="h-10 w-10"
+            />
+            <span className="text-xl font-bold text-gray-800">Azimut Inventar</span>
           </div>
         </div>
         
