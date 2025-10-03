@@ -12,7 +12,59 @@ export const Clients: React.FC<ClientsProps> = ({ transactions }) => {
   const [selectedProject, setSelectedProject] = useState<string>('all');
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
-  const exportToCSV = () => {
+  const exportToCSV = (exportType: 'current' | 'all-separate' = 'current') => {
+    if (exportType === 'all-separate') {
+      // Export separate CSV for each project
+      projects.forEach(project => {
+        const projectTransactions = outputTransactions.filter(t => t.project === project);
+        
+        if (projectTransactions.length === 0) return;
+        
+        const csvData = projectTransactions
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .map(transaction => ({
+            'Datum': transaction.date,
+            'Projekat': transaction.project,
+            'Stavka': transaction.itemName,
+            'Količina': -transaction.quantity,
+            'Jedinična cena': transaction.unitPrice.toFixed(2),
+            'Ukupna vrednost': transaction.totalValue.toFixed(2),
+            'Osoblje': transaction.staffName,
+            'Komentar': transaction.comment || ''
+          }));
+
+        const headers = Object.keys(csvData[0] || {});
+        const csvContent = [
+          headers.join(','),
+          ...csvData.map(row => 
+            headers.map(header => {
+              const value = row[header as keyof typeof row];
+              return typeof value === 'string' && (value.includes(',') || value.includes('"')) 
+                ? `"${value.replace(/"/g, '""')}"` 
+                : value;
+            }).join(',')
+          )
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        
+        const fileName = `klijenti_${project.replace(/[^a-zA-Z0-9]/g, '_')}.csv`;
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Small delay between downloads to avoid browser blocking
+        setTimeout(() => {}, 100);
+      });
+      return;
+    }
+
+    // Original single CSV export
     const csvData = filteredTransactions.map(transaction => ({
       'Datum': transaction.date,
       'Projekat': transaction.project,
@@ -111,14 +163,24 @@ export const Clients: React.FC<ClientsProps> = ({ transactions }) => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Klijenti - Izlaz materijala</h1>
-        <button
-          onClick={exportToCSV}
-          disabled={filteredTransactions.length === 0}
-          className="flex items-center px-3 lg:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm lg:text-base disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          <Download className="h-4 w-4 lg:h-5 lg:w-5 mr-1 lg:mr-2" />
-          Izvezi CSV
-        </button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <button
+            onClick={() => exportToCSV('current')}
+            disabled={filteredTransactions.length === 0}
+            className="flex items-center px-3 lg:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm lg:text-base disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            <Download className="h-4 w-4 lg:h-5 lg:w-5 mr-1 lg:mr-2" />
+            Izvezi trenutni
+          </button>
+          <button
+            onClick={() => exportToCSV('all-separate')}
+            disabled={projects.length === 0}
+            className="flex items-center px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm lg:text-base disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            <Download className="h-4 w-4 lg:h-5 lg:w-5 mr-1 lg:mr-2" />
+            Izvezi sve projekte
+          </button>
+        </div>
       </div>
 
       {/* Project Statistics Cards */}
