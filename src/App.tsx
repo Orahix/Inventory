@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
+import { useAuth } from './hooks/useAuth';
+import { LoginForm } from './components/LoginForm';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { useInventory } from './hooks/useInventory';
 import { useStaff } from './hooks/useStaff';
 import { useTransactions } from './hooks/useTransactions';
+import { LogOut, User } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { InventoryList } from './components/InventoryList';
@@ -15,11 +19,30 @@ function App() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
+  // Authentication
+  const { user, userProfile, loading: authLoading, error: authError, signIn, signOut, isAdmin } = useAuth();
+  
   // Use database hooks
   const { items: inventory, loading: inventoryLoading, error: inventoryError, addItem, updateItem, deleteItem } = useInventory();
   const { staff, loading: staffLoading, error: staffError, addStaff, updateStaff, deleteStaff } = useStaff();
   const { transactions, loading: transactionsLoading, error: transactionsError, addTransaction } = useTransactions();
   
+  // Show login form if not authenticated
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Učitavanje...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !userProfile) {
+    return <LoginForm onLogin={signIn} loading={authLoading} error={authError} />;
+  }
+
   // Show loading state
   if (inventoryLoading || staffLoading || transactionsLoading) {
     return (
@@ -95,7 +118,7 @@ function App() {
       case 'dashboard':
         return <Dashboard inventory={inventory} transactions={transactions} />;
       case 'inventory':
-        return (
+        return isAdmin() ? (
           <InventoryList
             inventory={inventory}
             transactions={transactions}
@@ -105,6 +128,18 @@ function App() {
             onDeleteItem={handleDeleteItem}
             onAddSupplier={handleAddSupplier}
           />
+        ) : (
+          <ProtectedRoute requiredRole="Admin">
+            <InventoryList
+              inventory={inventory}
+              transactions={transactions}
+              suppliers={suppliers}
+              onAddItem={handleAddItem}
+              onUpdateItem={handleUpdateItem}
+              onDeleteItem={handleDeleteItem}
+              onAddSupplier={handleAddSupplier}
+            />
+          </ProtectedRoute>
         );
       case 'input':
         return (
@@ -127,13 +162,22 @@ function App() {
           />
         );
       case 'staff':
-        return (
+        return isAdmin() ? (
           <StaffManagement
             staff={staff}
             onAddStaff={handleAddStaff}
             onUpdateStaff={handleUpdateStaff}
             onDeleteStaff={handleDeleteStaff}
           />
+        ) : (
+          <ProtectedRoute requiredRole="Admin">
+            <StaffManagement
+              staff={staff}
+              onAddStaff={handleAddStaff}
+              onUpdateStaff={handleUpdateStaff}
+              onDeleteStaff={handleDeleteStaff}
+            />
+          </ProtectedRoute>
         );
       case 'history':
         return <TransactionHistory transactions={transactions} />;
@@ -146,6 +190,26 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+      {/* User info and logout */}
+      <div className="hidden lg:block absolute top-4 right-4 z-10">
+        <div className="flex items-center space-x-4 bg-white rounded-lg shadow-sm px-4 py-2">
+          <div className="flex items-center space-x-2">
+            <User className="h-4 w-4 text-gray-600" />
+            <div className="text-sm">
+              <p className="font-medium text-gray-900">{userProfile.email}</p>
+              <p className="text-gray-500">{userProfile.role}</p>
+            </div>
+          </div>
+          <button
+            onClick={signOut}
+            className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            title="Odjavite se"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
       <Sidebar 
         currentView={currentView} 
         onViewChange={(view) => {
@@ -154,6 +218,8 @@ function App() {
         }}
         isMobileMenuOpen={isMobileMenuOpen}
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        userProfile={userProfile}
+        onSignOut={signOut}
       />
       <main className="flex-1 p-4 lg:p-8">
         {renderCurrentView()}

@@ -1,28 +1,37 @@
 import React from 'react';
-import { Package, Users, History, BarChart3, Plus, Minus, Menu, X } from 'lucide-react';
+import { Package, Users, History, BarChart3, Plus, Minus, Menu, X, User, LogOut } from 'lucide-react';
+import type { UserProfile } from '../hooks/useAuth';
 
 interface SidebarProps {
   currentView: string;
   onViewChange: (view: string) => void;
   isMobileMenuOpen: boolean;
   onToggleMobileMenu: () => void;
+  userProfile: UserProfile;
+  onSignOut: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
   currentView, 
   onViewChange, 
   isMobileMenuOpen, 
-  onToggleMobileMenu 
+  onToggleMobileMenu,
+  userProfile,
+  onSignOut
 }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Kontrolna tabla', icon: BarChart3 },
-    { id: 'inventory', label: 'Inventar', icon: Package },
+    { id: 'inventory', label: 'Inventar', icon: Package, adminOnly: true },
     { id: 'input', label: 'Ulaz robe', icon: Plus },
     { id: 'output', label: 'Izlaz robe', icon: Minus },
-    { id: 'staff', label: 'Osoblje', icon: Users },
+    { id: 'staff', label: 'Osoblje', icon: Users, adminOnly: true },
     { id: 'history', label: 'Istorija', icon: History },
     { id: 'clients', label: 'Klijenti', icon: Users },
   ];
+
+  const filteredMenuItems = menuItems.filter(item => 
+    !item.adminOnly || userProfile.role === 'Admin'
+  );
 
   return (
     <>
@@ -62,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
         
         <nav className="mt-0 lg:mt-6">
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
@@ -80,6 +89,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
             );
           })}
         </nav>
+        
+        {/* User info and logout - Mobile */}
+        <div className="lg:hidden border-t mt-4 pt-4 px-4 pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <User className="h-4 w-4 text-gray-600" />
+              <div className="text-sm">
+                <p className="font-medium text-gray-900 truncate max-w-[150px]">{userProfile.email}</p>
+                <p className="text-gray-500">{userProfile.role}</p>
+              </div>
+            </div>
+            <button
+              onClick={onSignOut}
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+              title="Odjavite se"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       </div>
     </>
   );
