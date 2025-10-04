@@ -18,19 +18,37 @@ export const useAuth = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('useAuth: Starting authentication check');
+    
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      console.log('useAuth: Initial session check', { session: !!session, error });
+      
+      if (error) {
+        console.error('useAuth: Session error:', error);
+        setError('Failed to check authentication status');
+        setLoading(false);
+        return;
+      }
+      
       setUser(session?.user ?? null);
       if (session?.user) {
+        console.log('useAuth: User found, fetching profile');
         fetchUserProfile(session.user.id);
       } else {
+        console.log('useAuth: No user session found');
         setLoading(false);
       }
+    }).catch((err) => {
+      console.error('useAuth: Session check failed:', err);
+      setError('Authentication system unavailable');
+      setLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('useAuth: Auth state changed', { event, session: !!session });
         setUser(session?.user ?? null);
         if (session?.user) {
           await fetchUserProfile(session.user.id);
@@ -46,25 +64,35 @@ export const useAuth = () => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('fetchUserProfile: Starting for user', userId);
       setError(null);
+      
       const { data, error: profileError } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
         .single();
 
+      console.log('fetchUserProfile: Query result', { data: !!data, error: profileError });
+
       if (profileError) {
         console.error('Profile fetch error:', profileError);
-        setError('Unable to load user profile. Please contact administrator.');
+        if (profileError.code === 'PGRST116') {
+          setError('User profile not found. Please contact administrator.');
+        } else {
+          setError(`Profile error: ${profileError.message}`);
+        }
         setUserProfile(null);
       } else {
+        console.log('fetchUserProfile: Profile loaded successfully');
         setUserProfile(data);
       }
     } catch (err) {
       console.error('Profile fetch exception:', err);
-      setError('Failed to load user profile. Please try again.');
+      setError(`Failed to load user profile: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setUserProfile(null);
     } finally {
+      console.log('fetchUserProfile: Setting loading to false');
       setLoading(false);
     }
   };
