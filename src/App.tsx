@@ -161,17 +161,7 @@ function App() {
       case 'dashboard':
         return <Dashboard inventory={inventory} transactions={transactions} />;
       case 'inventory':
-        return isAdmin() ? (
-          <InventoryList
-            inventory={inventory}
-            transactions={transactions}
-            suppliers={suppliers}
-            onAddItem={handleAddItem}
-            onUpdateItem={handleUpdateItem}
-            onDeleteItem={handleDeleteItem}
-            onAddSupplier={handleAddSupplier}
-          />
-        ) : (
+        return (
           <ProtectedRoute requiredRole="Admin">
             <InventoryList
               inventory={inventory}
@@ -205,14 +195,7 @@ function App() {
           />
         );
       case 'staff':
-        return isAdmin() ? (
-          <StaffManagement
-            staff={staff}
-            onAddStaff={handleAddStaff}
-            onUpdateStaff={handleUpdateStaff}
-            onDeleteStaff={handleDeleteStaff}
-          />
-        ) : (
+        return (
           <ProtectedRoute requiredRole="Admin">
             <StaffManagement
               staff={staff}
