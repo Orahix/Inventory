@@ -12,3 +12,5 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('VITE_SUPABASE_URL:', supabaseUrl);
   console.error('VITE_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Present' : 'Missing');
 }
+
+export const supabase = createClient<Database>(supabaseUrl!, supabaseAnonKey!);
