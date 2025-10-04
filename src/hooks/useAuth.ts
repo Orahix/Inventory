@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
+export interface AuthError {
+  code: string;
+  message: string;
+}
+
 export interface UserProfile {
   id: string;
   user_id: string;
@@ -15,7 +20,7 @@ export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AuthError | null>(null);
 
   useEffect(() => {
     console.log('useAuth: Starting authentication check');
@@ -26,7 +31,10 @@ export const useAuth = () => {
       
       if (error) {
         console.error('useAuth: Session error:', error);
-        setError('Failed to check authentication status');
+        setError({
+          code: 'SESSION_ERROR',
+          message: 'Failed to check authentication status'
+        });
         setLoading(false);
         return;
       }
@@ -41,7 +49,10 @@ export const useAuth = () => {
       }
     }).catch((err) => {
       console.error('useAuth: Session check failed:', err);
-      setError('Authentication system unavailable');
+      setError({
+        code: 'SYSTEM_ERROR',
+        message: 'Authentication system unavailable'
+      });
       setLoading(false);
     });
 
@@ -78,9 +89,15 @@ export const useAuth = () => {
       if (profileError) {
         console.error('Profile fetch error:', profileError);
         if (profileError.code === 'PGRST116') {
-          setError('User profile not found. Please contact administrator.');
+          setError({
+            code: 'PROFILE_NOT_FOUND',
+            message: 'User profile not found. Please contact administrator.'
+          });
         } else {
-          setError(`Profile error: ${profileError.message}`);
+          setError({
+            code: 'PROFILE_ERROR',
+            message: `Profile error: ${profileError.message}`
+          });
         }
         setUserProfile(null);
       } else {
@@ -89,7 +106,10 @@ export const useAuth = () => {
       }
     } catch (err) {
       console.error('Profile fetch exception:', err);
-      setError(`Failed to load user profile: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setError({
+        code: 'PROFILE_FETCH_ERROR',
+        message: `Failed to load user profile: ${err instanceof Error ? err.message : 'Unknown error'}`
+      });
       setUserProfile(null);
     } finally {
       console.log('fetchUserProfile: Setting loading to false');
@@ -108,26 +128,32 @@ export const useAuth = () => {
       });
 
       if (signInError) {
+        let errorCode = 'SIGNIN_ERROR';
         let errorMessage = signInError.message;
         
         // Provide more user-friendly error messages in Serbian
         if (signInError.message === 'Invalid login credentials') {
+          errorCode = 'INVALID_CREDENTIALS';
           errorMessage = 'Neispravni podaci za prijavu. Proverite email adresu i lozinku.';
         } else if (signInError.message.includes('Email not confirmed')) {
+          errorCode = 'EMAIL_NOT_CONFIRMED';
           errorMessage = 'Email adresa nije potvrđena. Proverite vaš email za link za potvrdu.';
         } else if (signInError.message.includes('Too many requests')) {
+          errorCode = 'TOO_MANY_REQUESTS';
           errorMessage = 'Previše pokušaja prijave. Pokušajte ponovo za nekoliko minuta.';
         }
         
-        setError(errorMessage);
-        return { success: false, error: errorMessage };
+        const authError = { code: errorCode, message: errorMessage };
+        setError(authError);
+        return { success: false, error: authError };
       }
 
       return { success: true, user: data.user };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Sign in failed';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+      const authError = { code: 'SIGNIN_EXCEPTION', message: errorMessage };
+      setError(authError);
+      return { success: false, error: authError };
     } finally {
       setLoading(false);
     }
@@ -140,10 +166,16 @@ export const useAuth = () => {
     try {
       const { error: signOutError } = await supabase.auth.signOut();
       if (signOutError) {
-        setError(signOutError.message);
+        setError({
+          code: 'SIGNOUT_ERROR',
+          message: signOutError.message
+        });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign out failed');
+      setError({
+        code: 'SIGNOUT_EXCEPTION',
+        message: err instanceof Error ? err.message : 'Sign out failed'
+      });
     } finally {
       setLoading(false);
     }
