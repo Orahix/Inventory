@@ -108,8 +108,19 @@ export const useAuth = () => {
       });
 
       if (signInError) {
-        setError(signInError.message);
-        return { success: false, error: signInError.message };
+        let errorMessage = signInError.message;
+        
+        // Provide more user-friendly error messages in Serbian
+        if (signInError.message === 'Invalid login credentials') {
+          errorMessage = 'Neispravni podaci za prijavu. Proverite email adresu i lozinku.';
+        } else if (signInError.message.includes('Email not confirmed')) {
+          errorMessage = 'Email adresa nije potvrđena. Proverite vaš email za link za potvrdu.';
+        } else if (signInError.message.includes('Too many requests')) {
+          errorMessage = 'Previše pokušaja prijave. Pokušajte ponovo za nekoliko minuta.';
+        }
+        
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
       }
 
       return { success: true, user: data.user };
