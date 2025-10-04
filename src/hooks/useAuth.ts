@@ -54,18 +54,15 @@ export const useAuth = () => {
         .single();
 
       if (profileError) {
-        if (profileError.code === 'PGRST116') {
-          // No profile found - user not authorized
-          setError('Unauthorized: Your email is not authorized to access this application.');
-        } else {
-          setError(profileError.message);
-        }
+        console.error('Profile fetch error:', profileError);
+        setError('Unable to load user profile. Please contact administrator.');
         setUserProfile(null);
       } else {
         setUserProfile(data);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch user profile');
+      console.error('Profile fetch exception:', err);
+      setError('Failed to load user profile. Please try again.');
       setUserProfile(null);
     } finally {
       setLoading(false);
