@@ -25,9 +25,13 @@ export const useAuth = () => {
   useEffect(() => {
     console.log('useAuth: Starting authentication check');
     
+    let mounted = true;
+    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       console.log('useAuth: Initial session check', { session: !!session, error });
+      
+      if (!mounted) return;
       
       if (error) {
         console.error('useAuth: Session error:', error);
@@ -35,6 +39,8 @@ export const useAuth = () => {
           code: 'SESSION_ERROR',
           message: 'Failed to check authentication status'
         });
+        setUser(null);
+        setUserProfile(null);
         setLoading(false);
         return;
       }
@@ -46,14 +52,17 @@ export const useAuth = () => {
       } else {
         console.log('useAuth: No user session found');
         setUserProfile(null);
+        setError(null);
         setLoading(false);
       }
     }).catch((err) => {
       console.error('useAuth: Session check failed:', err);
+      if (!mounted) return;
       setError({
         code: 'SYSTEM_ERROR',
         message: 'Authentication system unavailable'
       });
+      setUser(null);
       setUserProfile(null);
       setLoading(false);
     });
@@ -62,6 +71,9 @@ export const useAuth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('useAuth: Auth state changed', { event, session: !!session });
+        
+        if (!mounted) return;
+        
         setError(null); // Clear any previous errors
         setUser(session?.user ?? null);
         if (session?.user) {
@@ -73,13 +85,20 @@ export const useAuth = () => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       console.log('fetchUserProfile: Starting for user', userId);
-      // Don't clear error here to avoid clearing login errors
       
       const { data, error: profileError } = await supabase
         .from('user_profiles')
@@ -105,7 +124,7 @@ export const useAuth = () => {
         setUserProfile(null);
       } else {
         console.log('fetchUserProfile: Profile loaded successfully');
-        setError(null); // Clear errors only on successful profile fetch
+        setError(null);
         setUserProfile(data);
       }
     } catch (err) {
@@ -124,7 +143,8 @@ export const useAuth = () => {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
-    setUserProfile(null); // Clear any existing profile
+    setUser(null);
+    setUserProfile(null);
     
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -150,11 +170,11 @@ export const useAuth = () => {
         
         const authError = { code: errorCode, message: errorMessage };
         setError(authError);
-        setLoading(false); // Ensure loading is stopped on error
+        setLoading(false);
         return { success: false, error: authError };
       }
 
-      // Don't set loading to false here - let the auth state change handler do it
+      // Success - auth state change will handle the rest
       return { success: true, user: data.user };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Sign in failed';
@@ -166,10 +186,8 @@ export const useAuth = () => {
   };
 
   const signOut = async () => {
-    setLoading(true);
-    setError(null);
-    
     try {
+      setLoading(true);
       const { error: signOutError } = await supabase.auth.signOut();
       if (signOutError) {
         setError({
@@ -177,15 +195,15 @@ export const useAuth = () => {
           message: signOutError.message
         });
       }
-      // Clear user data immediately on signout
-      setUser(null);
-      setUserProfile(null);
     } catch (err) {
       setError({
         code: 'SIGNOUT_EXCEPTION',
         message: err instanceof Error ? err.message : 'Sign out failed'
       });
     } finally {
+      // Always clear user data on signout attempt
+      setUser(null);
+      setUserProfile(null);
       setLoading(false);
     }
   };
