@@ -29,17 +29,60 @@ function App() {
   
   // Show login form if not authenticated
   if (authLoading) {
+    console.log('App: Showing loading state');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Učitavanje...</p>
+          <p className="text-gray-600">Učitavanje autentifikacije...</p>
+          <p className="text-xs text-gray-500 mt-2">Molimo sačekajte...</p>
         </div>
       </div>
     );
   }
 
+  // Show error if authentication failed
+  if (authError && !user) {
+    console.log('App: Showing auth error', authError);
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="text-red-600 mb-4">
+            <svg className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Greška autentifikacije</h2>
+          <p className="text-gray-600 mb-4">{authError}</p>
+          <div className="text-xs text-gray-500 mb-4">
+            <p>Proverite da li je Supabase konfigurisan ispravno.</p>
+            <p>Otvorite Developer Tools (F12) za više detalja.</p>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mr-2"
+          >
+            Pokušaj ponovo
+          </button>
+          <button
+            onClick={() => {
+              console.log('Environment variables:');
+              console.log('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL);
+              console.log('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Present' : 'Missing');
+            }}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            Debug Info
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('App: Auth state', { user: !!user, userProfile: !!userProfile });
+
   if (!user || !userProfile) {
+    console.log('App: Showing login form');
     return <LoginForm onLogin={signIn} loading={authLoading} error={authError} />;
   }
 
@@ -118,17 +161,7 @@ function App() {
       case 'dashboard':
         return <Dashboard inventory={inventory} transactions={transactions} />;
       case 'inventory':
-        return isAdmin() ? (
-          <InventoryList
-            inventory={inventory}
-            transactions={transactions}
-            suppliers={suppliers}
-            onAddItem={handleAddItem}
-            onUpdateItem={handleUpdateItem}
-            onDeleteItem={handleDeleteItem}
-            onAddSupplier={handleAddSupplier}
-          />
-        ) : (
+        return (
           <ProtectedRoute requiredRole="Admin">
             <InventoryList
               inventory={inventory}
@@ -162,14 +195,7 @@ function App() {
           />
         );
       case 'staff':
-        return isAdmin() ? (
-          <StaffManagement
-            staff={staff}
-            onAddStaff={handleAddStaff}
-            onUpdateStaff={handleUpdateStaff}
-            onDeleteStaff={handleDeleteStaff}
-          />
-        ) : (
+        return (
           <ProtectedRoute requiredRole="Admin">
             <StaffManagement
               staff={staff}

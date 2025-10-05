@@ -25,24 +25,10 @@ export const useAuth = () => {
   useEffect(() => {
     console.log('useAuth: Starting authentication check');
     
-    console.log('useAuth: Starting authentication check');
-    
     let mounted = true;
     
     // Get initial session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('useAuth: Initial session check', { session: !!session, error });
-      
-      if (error) {
-        console.error('useAuth: Session error:', error);
-        setError({
-          code: 'SESSION_ERROR',
-          message: 'Failed to check authentication status'
-        });
-        setLoading(false);
-        return;
-      }
-      
       console.log('useAuth: Initial session check', { session: !!session, error });
       
       if (!mounted) return;
@@ -62,10 +48,8 @@ export const useAuth = () => {
       setUser(session?.user ?? null);
       if (session?.user) {
         console.log('useAuth: User found, fetching profile');
-        console.log('useAuth: User found, fetching profile');
         fetchUserProfile(session.user.id);
       } else {
-        console.log('useAuth: No user session found');
         console.log('useAuth: No user session found');
         setUserProfile(null);
         setError(null);
@@ -73,17 +57,10 @@ export const useAuth = () => {
       }
     }).catch((err) => {
       console.error('useAuth: Session check failed:', err);
-      setError({
-        code: 'SESSION_CHECK_ERROR',
-        message: 'Authentication system unavailable'
-      });
-      setLoading(false);
-    }).catch((err) => {
-      console.error('useAuth: Session check failed:', err);
       if (!mounted) return;
       setError({
-        code: 'SESSION_CHECK_ERROR',
-        message: 'Failed to initialize authentication'
+        code: 'SYSTEM_ERROR',
+        message: 'Authentication system unavailable'
       });
       setUser(null);
       setUserProfile(null);
@@ -93,7 +70,6 @@ export const useAuth = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('useAuth: Auth state changed', { event, session: !!session });
         console.log('useAuth: Auth state changed', { event, session: !!session });
         
         if (!mounted) return;
@@ -117,7 +93,6 @@ export const useAuth = () => {
 
   const fetchUserProfile = async (userId: string) => {
     if (!userId) {
-      console.log('fetchUserProfile: Starting for user', userId);
       setLoading(false);
       return;
     }
@@ -125,14 +100,11 @@ export const useAuth = () => {
     try {
       console.log('fetchUserProfile: Starting for user', userId);
       
-      
       const { data, error: profileError } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
         .single();
-
-      console.log('fetchUserProfile: Query result', { data: !!data, error: profileError });
 
       console.log('fetchUserProfile: Query result', { data: !!data, error: profileError });
 
@@ -152,7 +124,6 @@ export const useAuth = () => {
         setUserProfile(null);
       } else {
         console.log('fetchUserProfile: Profile loaded successfully');
-        console.log('fetchUserProfile: Profile loaded successfully');
         setError(null);
         setUserProfile(data);
       }
@@ -164,7 +135,6 @@ export const useAuth = () => {
       });
       setUserProfile(null);
     } finally {
-      console.log('fetchUserProfile: Setting loading to false');
       console.log('fetchUserProfile: Setting loading to false');
       setLoading(false);
     }
