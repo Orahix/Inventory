@@ -45,6 +45,7 @@ export const useAuth = () => {
         fetchUserProfile(session.user.id);
       } else {
         console.log('useAuth: No user session found');
+        setUserProfile(null);
         setLoading(false);
       }
     }).catch((err) => {
@@ -53,6 +54,7 @@ export const useAuth = () => {
         code: 'SYSTEM_ERROR',
         message: 'Authentication system unavailable'
       });
+      setUserProfile(null);
       setLoading(false);
     });
 
@@ -60,6 +62,7 @@ export const useAuth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('useAuth: Auth state changed', { event, session: !!session });
+        setError(null); // Clear any previous errors
         setUser(session?.user ?? null);
         if (session?.user) {
           await fetchUserProfile(session.user.id);
@@ -76,7 +79,7 @@ export const useAuth = () => {
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log('fetchUserProfile: Starting for user', userId);
-      setError(null);
+      // Don't clear error here to avoid clearing login errors
       
       const { data, error: profileError } = await supabase
         .from('user_profiles')
@@ -102,6 +105,7 @@ export const useAuth = () => {
         setUserProfile(null);
       } else {
         console.log('fetchUserProfile: Profile loaded successfully');
+        setError(null); // Clear errors only on successful profile fetch
         setUserProfile(data);
       }
     } catch (err) {
@@ -120,6 +124,7 @@ export const useAuth = () => {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
+    setUserProfile(null); // Clear any existing profile
     
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -145,17 +150,18 @@ export const useAuth = () => {
         
         const authError = { code: errorCode, message: errorMessage };
         setError(authError);
+        setLoading(false); // Ensure loading is stopped on error
         return { success: false, error: authError };
       }
 
+      // Don't set loading to false here - let the auth state change handler do it
       return { success: true, user: data.user };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Sign in failed';
       const authError = { code: 'SIGNIN_EXCEPTION', message: errorMessage };
       setError(authError);
-      return { success: false, error: authError };
-    } finally {
       setLoading(false);
+      return { success: false, error: authError };
     }
   };
 
@@ -171,6 +177,9 @@ export const useAuth = () => {
           message: signOutError.message
         });
       }
+      // Clear user data immediately on signout
+      setUser(null);
+      setUserProfile(null);
     } catch (err) {
       setError({
         code: 'SIGNOUT_EXCEPTION',
