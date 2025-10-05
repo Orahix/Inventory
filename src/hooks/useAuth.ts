@@ -59,13 +59,11 @@ export const useAuth = () => {
       console.error('useAuth: Session check failed:', err);
       if (!mounted) return;
       setError({
-        code: 'SYSTEM_ERROR',
-        message: 'Authentication system unavailable'
-      });
-      setUser(null);
-      setUserProfile(null);
-      setLoading(false);
-    });
+        console.error('Profile fetch error:', profileError);
+        setError('Unable to load user profile. Please contact administrator.');
+          }      );
+    }
+    )
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -127,6 +125,8 @@ export const useAuth = () => {
         setError(null);
         setUserProfile(data);
       }
+      console.error('Profile fetch exception:', err);
+      setError('Failed to load user profile. Please try again.');
     } catch (err) {
       console.error('Profile fetch exception:', err);
       setError({
