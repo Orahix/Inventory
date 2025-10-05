@@ -59,11 +59,13 @@ export const useAuth = () => {
       console.error('useAuth: Session check failed:', err);
       if (!mounted) return;
       setError({
-        console.error('Profile fetch error:', profileError);
-        setError('Unable to load user profile. Please contact administrator.');
-          }      );
-    }
-    )
+        code: 'SESSION_CHECK_ERROR',
+        message: 'Failed to initialize authentication'
+      });
+      setUser(null);
+      setUserProfile(null);
+      setLoading(false);
+    });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
