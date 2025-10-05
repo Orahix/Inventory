@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, CreditCard as Edit, Trash2, Search, Filter, AlertCircle } from 'lucide-react';
 import { InventoryItem } from '../types';
-import { useAuth } from '../hooks/useAuth';
 import { Modal } from './Modal';
 import { InventoryForm } from './InventoryForm';
 
@@ -24,7 +23,6 @@ export const InventoryList: React.FC<InventoryListProps> = ({
   onDeleteItem,
   onAddSupplier,
 }) => {
-  const { isAdmin } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -89,15 +87,13 @@ export const InventoryList: React.FC<InventoryListProps> = ({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Upravljanje inventarom</h1>
-        {isAdmin() && (
-          <button
-            onClick={handleAddItem}
-            className="flex items-center px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm lg:text-base"
-          >
-            <Plus className="h-4 w-4 lg:h-5 lg:w-5 mr-1 lg:mr-2" />
-            Dodaj stavku
-          </button>
-        )}
+        <button
+          onClick={handleAddItem}
+          className="flex items-center px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm lg:text-base"
+        >
+          <Plus className="h-4 w-4 lg:h-5 lg:w-5 mr-1 lg:mr-2" />
+          Dodaj stavku
+        </button>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-6">
@@ -170,24 +166,20 @@ export const InventoryList: React.FC<InventoryListProps> = ({
                   </td>
                   <td className="py-3 px-2 lg:px-4">
                     <div className="flex space-x-2">
-                      {isAdmin() && (
-                        <>
-                          <button
-                            onClick={() => handleEditItem(item)}
-                            className="p-1 text-blue-600 hover:bg-blue-100 rounded text-sm lg:text-base"
-                            title="Edit item"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item.id, item.name)}
-                            className="p-1 text-red-600 hover:bg-red-100 rounded text-sm lg:text-base"
-                            title="Delete item"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </>
-                      )}
+                      <button
+                        onClick={() => handleEditItem(item)}
+                        className="p-1 text-blue-600 hover:bg-blue-100 rounded text-sm lg:text-base"
+                       title="Edit item"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                       onClick={() => handleDelete(item.id, item.name)}
+                        className="p-1 text-red-600 hover:bg-red-100 rounded text-sm lg:text-base"
+                       title="Delete item"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>
