@@ -55,8 +55,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar */}
       <div className={`
-        ${isMobileMenuOpen ? 'block' : 'hidden'} lg:block
-        w-full lg:w-64 bg-white shadow-lg lg:h-full
+        ${isMobileMenuOpen ? 'block' : 'hidden'} lg:flex lg:flex-col
+        w-full lg:w-64 bg-white shadow-lg lg:h-screen
         ${isMobileMenuOpen ? 'absolute inset-x-0 top-16 z-50 border-b' : ''}
       `}>
         <div className="hidden lg:block p-6 border-b">
@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
         
-        <nav className="mt-0 lg:mt-6">
+        <nav className="mt-0 lg:mt-6 lg:flex-1 lg:overflow-y-auto">
           {filteredMenuItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -90,8 +90,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </nav>
         
-        {/* User info and logout - Mobile */}
-        <div className="lg:hidden border-t mt-4 pt-4 px-4 pb-4">
+        {/* User info and logout */}
+        <div className="border-t mt-4 lg:mt-0 pt-4 px-4 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <User className="h-4 w-4 text-gray-600" />

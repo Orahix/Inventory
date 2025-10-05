@@ -5,7 +5,6 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { useInventory } from './hooks/useInventory';
 import { useStaff } from './hooks/useStaff';
 import { useTransactions } from './hooks/useTransactions';
-import { LogOut, User } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { InventoryList } from './components/InventoryList';
@@ -216,28 +215,8 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
-      {/* User info and logout */}
-      <div className="hidden lg:block absolute top-4 right-4 z-10">
-        <div className="flex items-center space-x-4 bg-white rounded-lg shadow-sm px-4 py-2">
-          <div className="flex items-center space-x-2">
-            <User className="h-4 w-4 text-gray-600" />
-            <div className="text-sm">
-              <p className="font-medium text-gray-900">{userProfile.email}</p>
-              <p className="text-gray-500">{userProfile.role}</p>
-            </div>
-          </div>
-          <button
-            onClick={signOut}
-            className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-            title="Odjavite se"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      <Sidebar 
-        currentView={currentView} 
+      <Sidebar
+        currentView={currentView}
         onViewChange={(view) => {
           setCurrentView(view);
           setIsMobileMenuOpen(false);
