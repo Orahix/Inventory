@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { LogIn, AlertCircle, Eye, EyeOff } from 'lucide-react';
-import type { AuthError } from '../hooks/useAuth';
 
 interface LoginFormProps {
-  onLogin: (email: string, password: string) => Promise<{ success: boolean; error?: AuthError }>;
+  onLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   loading: boolean;
-  error: AuthError | null;
+  error: string | null;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading, error }) => {
@@ -39,14 +38,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading, error })
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
               <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-              <div className="text-red-700 text-sm">
-                <p>{error.message}</p>
-                {error.code === 'INVALID_CREDENTIALS' && (
-                  <p className="mt-1 text-xs text-red-600">
-                    Ako ste zaboravili lozinku, kontaktirajte administratora.
-                  </p>
-                )}
-              </div>
+              <span className="text-red-700 text-sm">{error}</span>
             </div>
           )}
           
