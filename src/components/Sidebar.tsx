@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, Users, History, BarChart3, Plus, Minus, Menu, X, User, LogOut, Compass } from 'lucide-react';
+import { Package, Users, History, BarChart3, Plus, Minus, Menu, X, User, LogOut } from 'lucide-react';
 import type { UserProfile } from '../hooks/useAuth';
 
 interface SidebarProps {
@@ -38,9 +38,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile menu button */}
       <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Compass className="h-5 w-5 text-white" />
-          </div>
+          <img
+            src="/cropped-azimut-logo-A-300x300-removebg-preview copy copy.png"
+            alt="Azimut Logo"
+            className="h-8 w-8"
+          />
           <span className="text-lg font-bold text-gray-800">Azimut Inventar</span>
         </div>
         <button
@@ -59,9 +61,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       `}>
         <div className="hidden lg:block p-6 border-b">
           <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Compass className="h-6 w-6 text-white" />
-            </div>
+            <img
+              src="/cropped-azimut-logo-A-300x300-removebg-preview copy copy.png"
+              alt="Azimut Logo"
+              className="h-10 w-10"
+            />
             <span className="text-xl font-bold text-gray-800">Azimut Inventar</span>
           </div>
         </div>

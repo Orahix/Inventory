@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, AlertCircle, Eye, EyeOff, Compass } from 'lucide-react';
+import { LogIn, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import type { AuthError } from '../hooks/useAuth';
 
 interface LoginFormProps {
@@ -22,9 +22,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading, error })
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-20 w-20 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <Compass className="h-12 w-12 text-white" />
-          </div>
+          <img
+            src="/cropped-azimut-logo-A-300x300-removebg-preview copy copy.png"
+            alt="Azimut Logo"
+            className="mx-auto h-20 w-20"
+          />
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
             Azimut Inventar
           </h2>
