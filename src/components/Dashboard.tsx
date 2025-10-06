@@ -9,15 +9,13 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ inventory, transactions }) => {
   const [selectedProject, setSelectedProject] = React.useState<string>('all');
-  
-  // Get unique projects from transactions
+
   const projects = Array.from(new Set(transactions.map(t => t.project))).filter(Boolean);
-  
-  // Filter inventory by project
-  const filteredInventory = selectedProject === 'all' 
-    ? inventory 
+
+  const filteredInventory = selectedProject === 'all'
+    ? inventory
     : inventory.filter(item => item.project === selectedProject);
-  
+
   const filteredTransactions = selectedProject === 'all'
     ? transactions
     : transactions.filter(t => t.project === selectedProject);
@@ -32,33 +30,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ inventory, transactions })
       title: 'Ukupno stavki',
       value: totalItems.toString(),
       icon: Package,
-      color: 'blue',
+      bgColor: 'bg-[#82B0C5]',
+      bgLight: 'bg-[#82B0C5] bg-opacity-10',
     },
     {
       title: 'Ukupna vrednost',
       value: `${totalValue.toLocaleString()} RSD`,
       icon: TrendingUp,
-      color: 'green',
+      bgColor: 'bg-[#2E7D32]',
+      bgLight: 'bg-[#2E7D32] bg-opacity-10',
     },
     {
       title: 'Upozorenja o niskim zalihama',
       value: lowStockItems.length.toString(),
       icon: AlertTriangle,
-      color: 'red',
+      bgColor: 'bg-[#FF6F00]',
+      bgLight: 'bg-[#FF6F00] bg-opacity-10',
     },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-[1280px] mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Kontrolna tabla</h1>
-        
+        <h1 className="text-2xl lg:text-3xl font-bold text-[#2E2E2E]">Kontrolna tabla</h1>
+
         <div className="flex items-center space-x-2">
-          <Filter className="h-5 w-5 text-gray-400" />
+          <Filter className="h-5 w-5 text-[#5A5A5A]" />
           <select
             value={selectedProject}
             onChange={(e) => setSelectedProject(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="input-field text-sm py-2"
           >
             <option value="all">Svi projekti</option>
             {projects.map(project => (
@@ -67,19 +68,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ inventory, transactions })
           </select>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.title} className="bg-white rounded-lg shadow-sm p-4 lg:p-6">
+            <div key={card.title} className="card p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs lg:text-sm font-medium text-gray-600">{card.title}</p>
-                  <p className="text-xl lg:text-3xl font-bold text-gray-900">{card.value}</p>
+                  <p className="text-sm font-medium text-[#5A5A5A] mb-2">{card.title}</p>
+                  <p className="text-3xl font-bold text-[#2E2E2E]">{card.value}</p>
                 </div>
-                <div className={`p-2 lg:p-3 rounded-full bg-${card.color}-100`}>
-                  <Icon className={`h-5 w-5 lg:h-6 lg:w-6 text-${card.color}-600`} />
+                <div className={`p-3 rounded-[10px] ${card.bgLight}`}>
+                  <Icon className={`h-6 w-6 ${card.bgColor.replace('bg-', 'text-').replace(' bg-opacity-10', '')}`} />
                 </div>
               </div>
             </div>
@@ -88,20 +89,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ inventory, transactions })
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow-sm p-4 lg:p-6">
-          <h3 className="text-base lg:text-lg font-semibold text-gray-800 mb-4">Upozorenja o niskim zalihama</h3>
+        <div className="card p-6">
+          <h3 className="text-lg font-semibold text-[#2E2E2E] mb-4">Upozorenja o niskim zalihama</h3>
           {lowStockItems.length === 0 ? (
-            <p className="text-sm text-gray-500">Nema stavki sa niskim zalihama</p>
+            <p className="text-sm text-[#5A5A5A]">Nema stavki sa niskim zalihama</p>
           ) : (
             <div className="space-y-3">
               {lowStockItems.slice(0, 5).map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-2 lg:p-3 bg-red-50 rounded-lg">
-                  <div>
-                    <p className="text-sm lg:text-base font-medium text-gray-900 truncate max-w-[200px]">{item.name}</p>
+                <div key={item.id} className="flex items-center justify-between p-3 bg-[#FF6F00] bg-opacity-10 border border-[#FF6F00] border-opacity-20 rounded-[10px]">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-[#2E2E2E] truncate">{item.name}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm lg:text-base font-semibold text-red-600">{item.currentStock}</p>
-                    <p className="text-xs text-gray-500">Min: {item.minStock}</p>
+                  <div className="text-right ml-3">
+                    <p className="text-base font-semibold text-[#FF6F00]">{item.currentStock}</p>
+                    <p className="text-xs text-[#5A5A5A]">Min: {item.minStock}</p>
                   </div>
                 </div>
               ))}
@@ -109,17 +110,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ inventory, transactions })
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-4 lg:p-6">
+        <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base lg:text-lg font-semibold text-gray-800">Materijali po projektima</h3>
-            <BarChart3 className="h-5 w-5 text-blue-600" />
+            <h3 className="text-lg font-semibold text-[#2E2E2E]">Materijali po projektima</h3>
+            <BarChart3 className="h-5 w-5 text-[#82B0C5]" />
           </div>
-          
+
           <div className="mb-4">
             <select
               value={selectedProject}
               onChange={(e) => setSelectedProject(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="input-field text-sm py-2"
             >
               <option value="all">Svi projekti</option>
               {projects.map(project => (
@@ -129,10 +130,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ inventory, transactions })
           </div>
 
           {(() => {
-            const projectTransactions = selectedProject === 'all' 
+            const projectTransactions = selectedProject === 'all'
               ? transactions.filter(t => t.type === 'output')
               : transactions.filter(t => t.type === 'output' && t.project === selectedProject);
-            
+
             const projectMaterials = projectTransactions.reduce((acc, transaction) => {
               const key = `${transaction.project}-${transaction.itemName}`;
               if (!acc[key]) {
@@ -151,61 +152,63 @@ export const Dashboard: React.FC<DashboardProps> = ({ inventory, transactions })
             const sortedMaterials = Object.values(projectMaterials)
               .sort((a, b) => b.totalValue - a.totalValue)
               .slice(0, 5);
-        <div className="bg-white rounded-lg shadow-sm p-4 lg:p-6">
-          <h3 className="text-base lg:text-lg font-semibold text-gray-800 mb-4">Nedavne transakcije</h3>
-          {recentTransactions.length === 0 ? (
-            <p className="text-sm text-gray-500">Nema nedavnih transakcija</p>
-          ) : (
-            <div className="space-y-3">
-              {recentTransactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center justify-between p-2 lg:p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`p-1 lg:p-2 rounded-full ${
-                      transaction.type === 'input' ? 'bg-green-100' : 'bg-red-100'
-                    }`}>
-                      {transaction.type === 'input' ? (
-                        <TrendingUp className="h-3 w-3 lg:h-4 lg:w-4 text-green-600" />
-                      ) : (
-                        <TrendingDown className="h-3 w-3 lg:h-4 lg:w-4 text-red-600" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm lg:text-base font-medium text-gray-900 truncate max-w-[150px]">{transaction.itemName}</p>
-                      <p className="text-xs lg:text-sm text-gray-600 truncate max-w-[150px]">{transaction.reason}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={`text-sm lg:text-base font-semibold ${
-                      transaction.type === 'input' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {transaction.type === 'input' ? '+' : '-'}{transaction.quantity}
-                    </p>
-                    <p className="text-xs lg:text-sm text-gray-500">{transaction.date}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+
             return sortedMaterials.length === 0 ? (
-              <p className="text-sm text-gray-500">Nema izvezenih materijala</p>
+              <p className="text-sm text-[#5A5A5A]">Nema izvezenih materijala</p>
             ) : (
               <div className="space-y-3">
-                {sortedMaterials.map((material, index) => (
-                  <div key={`${material.project}-${material.itemName}`} className="flex items-center justify-between p-2 lg:p-3 bg-blue-50 rounded-lg">
+                {sortedMaterials.map((material) => (
+                  <div key={`${material.project}-${material.itemName}`} className="flex items-center justify-between p-3 bg-[#82B0C5] bg-opacity-10 border border-[#82B0C5] border-opacity-20 rounded-[10px]">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm lg:text-base font-medium text-gray-900 truncate">{material.itemName}</p>
-                      <p className="text-xs text-gray-600 truncate">{material.project}</p>
+                      <p className="text-sm font-medium text-[#2E2E2E] truncate">{material.itemName}</p>
+                      <p className="text-xs text-[#5A5A5A] truncate">{material.project}</p>
                     </div>
-                    <div className="text-right ml-2">
-                      <p className="text-sm lg:text-base font-semibold text-blue-600">{material.totalQuantity}</p>
-                      <p className="text-xs text-gray-500">{material.totalValue.toFixed(0)} RSD</p>
+                    <div className="text-right ml-3">
+                      <p className="text-base font-semibold text-[#82B0C5]">{material.totalQuantity}</p>
+                      <p className="text-xs text-[#5A5A5A]">{material.totalValue.toFixed(0)} RSD</p>
                     </div>
                   </div>
                 ))}
               </div>
             );
           })()}
+        </div>
+
+        <div className="card p-6">
+          <h3 className="text-lg font-semibold text-[#2E2E2E] mb-4">Nedavne transakcije</h3>
+          {recentTransactions.length === 0 ? (
+            <p className="text-sm text-[#5A5A5A]">Nema nedavnih transakcija</p>
+          ) : (
+            <div className="space-y-3">
+              {recentTransactions.map((transaction) => (
+                <div key={transaction.id} className="flex items-center justify-between p-3 bg-[#F3F4F6] rounded-[10px]">
+                  <div className="flex items-center space-x-3 min-w-0 flex-1">
+                    <div className={`p-2 rounded-full ${
+                      transaction.type === 'input' ? 'bg-[#2E7D32] bg-opacity-10' : 'bg-[#FF6F00] bg-opacity-10'
+                    }`}>
+                      {transaction.type === 'input' ? (
+                        <TrendingUp className="h-4 w-4 text-[#2E7D32]" />
+                      ) : (
+                        <TrendingDown className="h-4 w-4 text-[#FF6F00]" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-[#2E2E2E] truncate">{transaction.itemName}</p>
+                      <p className="text-xs text-[#5A5A5A] truncate">{transaction.reason}</p>
+                    </div>
+                  </div>
+                  <div className="text-right ml-3">
+                    <p className={`text-base font-semibold ${
+                      transaction.type === 'input' ? 'text-[#2E7D32]' : 'text-[#FF6F00]'
+                    }`}>
+                      {transaction.type === 'input' ? '+' : '-'}{transaction.quantity}
+                    </p>
+                    <p className="text-xs text-[#5A5A5A]">{transaction.date}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

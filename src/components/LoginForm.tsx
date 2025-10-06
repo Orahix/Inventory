@@ -19,7 +19,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading, error })
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <img
@@ -27,20 +27,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading, error })
             alt="Azimut Logo"
             className="mx-auto h-20 w-20"
           />
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <h2 className="mt-6 text-3xl font-bold text-[#2E2E2E]">
             Azimut Inventar
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-[#5A5A5A]">
             Prijavite se na vaš nalog
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
-              <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+            <div className="bg-red-50 border border-red-300 rounded-[10px] p-4 flex items-start">
+              <AlertCircle className="h-5 w-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
               <div className="text-red-700 text-sm">
-                <p>{error.message}</p>
+                <p className="font-medium">{error.message}</p>
                 {error.code === 'INVALID_CREDENTIALS' && (
                   <p className="mt-1 text-xs text-red-600">
                     Ako ste zaboravili lozinku, kontaktirajte administratora.
@@ -49,10 +49,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading, error })
               </div>
             </div>
           )}
-          
-          <div className="space-y-4">
+
+          <div className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="label-text">
                 Email adresa
               </label>
               <input
@@ -63,13 +63,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading, error })
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input-field"
                 placeholder="vas.email@azimut.rs"
               />
             </div>
-            
+
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="label-text">
                 Lozinka
               </label>
               <div className="relative">
@@ -81,46 +81,46 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, loading, error })
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="input-field pr-10"
                   placeholder="Unesite vašu lozinku"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#5A5A5A] hover:text-[#2E2E2E] transition-colors"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-5 w-5" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-5 w-5" />
                   )}
                 </button>
               </div>
             </div>
           </div>
 
-          <div>
+          <div className="pt-2">
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="btn-primary w-full flex justify-center items-center py-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#2E2E2E] border-t-transparent mr-2"></div>
                   Prijavljivanje...
-                </div>
+                </>
               ) : (
-                <div className="flex items-center">
+                <>
                   <LogIn className="h-4 w-4 mr-2" />
                   Prijavite se
-                </div>
+                </>
               )}
             </button>
           </div>
-          
-          <div className="text-center">
-            <p className="text-xs text-gray-500">
+
+          <div className="text-center pt-2">
+            <p className="text-xs text-[#5A5A5A]">
               Samo ovlašćeni korisnici Azimut-a mogu pristupiti ovoj aplikaciji
             </p>
           </div>

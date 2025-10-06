@@ -1,3 +1,74 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --color-orange: #FF6F00;
+    --color-orange-light: #FF8F33;
+    --color-orange-dark: #CC5900;
+    --color-gray-dark: #2E2E2E;
+    --color-gray-medium: #5A5A5A;
+    --color-gray-light: #E5E7EB;
+    --color-gray-lighter: #F3F4F6;
+    --color-blue: #82B0C5;
+    --color-blue-light: #A5C8D8;
+    --color-blue-dark: #658FA1;
+    --color-green: #2E7D32;
+    --color-green-light: #4CAF50;
+    --color-green-dark: #1B5E20;
+    --border-color: rgba(46, 46, 46, 0.12);
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --radius: 10px;
+    --radius-lg: 12px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#FF6F00] text-[#2E2E2E] font-medium px-4 py-2.5 rounded-[10px] transition-all duration-200;
+    @apply hover:bg-[#FF8F33] hover:shadow-[0_1px_2px_rgba(255,111,0,0.15)] focus:outline-none focus:ring-2 focus:ring-[#82B0C5] focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply border border-[rgba(46,46,46,0.16)] text-[#2E2E2E] font-medium px-4 py-2.5 rounded-[10px] transition-all duration-200;
+    @apply hover:bg-[#F3F4F6] hover:border-[rgba(46,46,46,0.24)] focus:outline-none focus:ring-2 focus:ring-[#82B0C5] focus:ring-offset-2;
+  }
+
+  .btn-success {
+    @apply bg-[#2E7D32] text-white font-medium px-4 py-2.5 rounded-[10px] transition-all duration-200;
+    @apply hover:bg-[#4CAF50] hover:shadow-[0_1px_2px_rgba(46,125,50,0.15)] focus:outline-none focus:ring-2 focus:ring-[#82B0C5] focus:ring-offset-2;
+  }
+
+  .btn-danger {
+    @apply border border-red-300 text-red-700 font-medium px-4 py-2.5 rounded-[10px] transition-all duration-200;
+    @apply hover:bg-red-50 hover:border-red-400 focus:outline-none focus:ring-2 focus:ring-[#82B0C5] focus:ring-offset-2;
+  }
+
+  .card {
+    @apply bg-white rounded-[12px] border border-[rgba(46,46,46,0.12)] shadow-[0_2px_8px_rgba(0,0,0,0.08)];
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 border border-[rgba(46,46,46,0.16)] rounded-[10px] text-[#2E2E2E] placeholder-[#5A5A5A];
+    @apply focus:outline-none focus:ring-2 focus:ring-[#82B0C5] focus:border-transparent transition-all duration-200;
+  }
+
+  .label-text {
+    @apply block text-sm font-medium text-[#2E2E2E] mb-2;
+  }
+
+  .link-blue {
+    @apply text-[#82B0C5] hover:text-[#658FA1] transition-colors duration-200;
+  }
+}

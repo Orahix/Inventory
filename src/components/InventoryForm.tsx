@@ -10,13 +10,13 @@ interface InventoryFormProps {
   isSubmitting?: boolean;
 }
 
-export const InventoryForm: React.FC<InventoryFormProps> = ({ 
-  item, 
-  suppliers, 
-  onSubmit, 
-  onCancel, 
-  onAddSupplier, 
-  isSubmitting = false 
+export const InventoryForm: React.FC<InventoryFormProps> = ({
+  item,
+  suppliers,
+  onSubmit,
+  onCancel,
+  onAddSupplier,
+  isSubmitting = false
 }) => {
   const [formData, setFormData] = useState({
     name: item?.name || '',
@@ -40,12 +40,11 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
       ...formData,
       supplier: isCustomSupplier ? customSupplier : formData.supplier,
     };
-    
-    // If using custom supplier, add it to the suppliers list
+
     if (isCustomSupplier && customSupplier.trim()) {
       onAddSupplier(customSupplier.trim());
     }
-    
+
     onSubmit(finalData);
   };
 
@@ -65,10 +64,10 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="label-text">
             Naziv stavke *
           </label>
           <input
@@ -77,12 +76,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+            className="input-field"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="label-text">
             Kategorija *
           </label>
           <select
@@ -90,7 +89,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             value={formData.category}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+            className="input-field"
           >
             <option value="">Izaberi kategoriju...</option>
             <option value="Solarni paneli">Solarni paneli</option>
@@ -107,7 +106,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="label-text">
             Trenutne zalihe
           </label>
           <input
@@ -116,12 +115,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             value={formData.currentStock}
             onChange={handleChange}
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+            className="input-field"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="label-text">
             Jedinična cena (RSD)
           </label>
           <input
@@ -131,12 +130,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             onChange={handleChange}
             min="0"
             step="0.01"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+            className="input-field"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="label-text">
             Minimalne zalihe
           </label>
           <input
@@ -145,12 +144,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             value={formData.minStock}
             onChange={handleChange}
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+            className="input-field"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="label-text">
             Maksimalne zalihe
           </label>
           <input
@@ -159,13 +158,13 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             value={formData.maxStock}
             onChange={handleChange}
             min="0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+            className="input-field"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="label-text">
           Dobavljač *
         </label>
         {!isCustomSupplier ? (
@@ -174,7 +173,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             value={formData.supplier}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+            className="input-field"
           >
             <option value="">Izaberi dobavljača...</option>
             {Array.isArray(suppliers) && suppliers.map(supplier => (
@@ -192,7 +191,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
               onChange={(e) => setCustomSupplier(e.target.value)}
               placeholder="Unesite naziv novog dobavljača..."
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+              className="input-field"
             />
             <button
               type="button"
@@ -201,7 +200,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                 setCustomSupplier('');
                 setFormData(prev => ({ ...prev, supplier: '' }));
               }}
-              className="text-xs lg:text-sm text-blue-600 hover:text-blue-800"
+              className="text-sm link-blue"
             >
               ← Nazad na listu dobavljača
             </button>
@@ -214,14 +213,14 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="px-3 lg:px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-sm lg:text-base"
+          className="btn-secondary"
         >
           Otkaži
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm lg:text-base"
+          className="btn-primary disabled:opacity-50"
         >
           {isSubmitting ? 'Čuva se...' : `${item ? 'Ažuriraj' : 'Dodaj'} stavku`}
         </button>

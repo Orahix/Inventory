@@ -176,7 +176,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#F3F4F6] flex flex-col lg:flex-row">
       <Sidebar
         currentView={currentView}
         onViewChange={(view) => {

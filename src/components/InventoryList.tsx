@@ -88,11 +88,11 @@ export const InventoryList: React.FC<InventoryListProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">Upravljanje inventarom</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-[#2E2E2E]">Upravljanje inventarom</h1>
         {isAdmin() && (
           <button
             onClick={handleAddItem}
-            className="flex items-center px-3 lg:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm lg:text-base"
+            className="btn-primary flex items-center"
           >
             <Plus className="h-4 w-4 lg:h-5 lg:w-5 mr-1 lg:mr-2" />
             Dodaj stavku
@@ -100,7 +100,7 @@ export const InventoryList: React.FC<InventoryListProps> = ({
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="card p-6 max-w-[1280px] mx-auto">
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -109,7 +109,7 @@ export const InventoryList: React.FC<InventoryListProps> = ({
               placeholder="Pretraži inventar..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+              className="input-field pl-10"
             />
           </div>
           
@@ -118,7 +118,7 @@ export const InventoryList: React.FC<InventoryListProps> = ({
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+              className="input-field text-sm py-2"
             >
               <option value="all">Sve kategorije</option>
               {categories.map(category => (
@@ -131,7 +131,7 @@ export const InventoryList: React.FC<InventoryListProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px]">
             <thead>
-              <tr className="border-b border-gray-200">
+              <tr className="border-b border-[rgba(46,46,46,0.12)]">
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Naziv</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Kategorija</th>
                 <th className="text-left py-3 px-2 lg:px-4 font-semibold text-gray-700 text-sm lg:text-base">Zalihe</th>
@@ -143,7 +143,7 @@ export const InventoryList: React.FC<InventoryListProps> = ({
             </thead>
             <tbody>
               {filteredInventory.map((item) => (
-                <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <tr key={item.id} className="border-b border-[rgba(46,46,46,0.08)] hover:bg-[#F3F4F6] transition-colors">
                   <td className="py-3 px-2 lg:px-4 font-medium text-gray-900 text-sm lg:text-base">
                     <div className="max-w-[150px] lg:max-w-none truncate" title={item.name}>
                       {item.name}
